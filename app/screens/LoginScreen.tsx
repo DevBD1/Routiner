@@ -1,7 +1,14 @@
 import React from "react";
-import { View, TouchableOpacity, StyleSheet, Platform, ActivityIndicator, ImageBackground } from "react-native";
+import {
+  View,
+  TouchableOpacity,
+  StyleSheet,
+  Platform,
+  ActivityIndicator,
+  ImageBackground,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 import { useRouter } from "expo-router";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
@@ -9,9 +16,15 @@ import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 
 export default function LoginScreen() {
-  const { signInWithGoogle, signInWithApple, signInAnonymously, loading, isAppleSignInAvailable } = useAuth();
+  const {
+    signInWithGoogle,
+    signInWithApple,
+    signInAnonymously,
+    loading,
+    isAppleSignInAvailable,
+  } = useAuth();
   const router = useRouter();
-  const colorScheme = useColorScheme() ?? 'light';
+  const colorScheme = useColorScheme() ?? "light";
 
   const handleGoogleSignIn = async () => {
     try {
@@ -43,9 +56,11 @@ export default function LoginScreen() {
   if (loading) {
     return (
       <ImageBackground
-        source={colorScheme === 'light' 
-          ? require('@/assets/images/login-bg-light.png')
-          : require('@/assets/images/login-bg-dark.png')}
+        source={
+          colorScheme === "light"
+            ? require("@/assets/images/login-bg-light.png")
+            : require("@/assets/images/login-bg-dark.png")
+        }
         style={styles.backgroundImage}
       >
         <ThemedView style={styles.container}>
@@ -57,40 +72,73 @@ export default function LoginScreen() {
 
   return (
     <ImageBackground
-      source={colorScheme === 'light' 
-        ? require('@/assets/images/login-bg-light.png')
-        : require('@/assets/images/login-bg-dark.png')}
+      source={
+        colorScheme === "light"
+          ? require("@/assets/images/login-bg-light.png")
+          : require("@/assets/images/login-bg-dark.png")
+      }
       style={styles.backgroundImage}
     >
       <ThemedView style={styles.container}>
-        <ThemedText type="title" style={styles.title}>Reflect, grow, and find calm every day!</ThemedText>
-        
+        <ThemedText type="title" style={styles.title}>
+          Reflect, grow, and find calm every day!
+        </ThemedText>
+
         {isAppleSignInAvailable && (
-          <TouchableOpacity 
-            style={[styles.button, { backgroundColor: Colors[colorScheme].background }]} 
+          <TouchableOpacity
+            style={[
+              styles.button,
+              { backgroundColor: Colors[colorScheme].background },
+            ]}
             onPress={handleAppleSignIn}
           >
-            <Ionicons name="logo-apple" size={20} color={Colors[colorScheme].text} style={styles.icon} />
-            <ThemedText style={styles.buttonText}>Continue with Apple</ThemedText>
+            <Ionicons
+              name="logo-apple"
+              size={20}
+              color={Colors[colorScheme].text}
+              style={styles.icon}
+            />
+            <ThemedText style={styles.buttonText}>
+              Continue with Apple
+            </ThemedText>
           </TouchableOpacity>
         )}
-        
-        <TouchableOpacity 
-          style={[styles.button, { backgroundColor: Colors[colorScheme].background }]} 
+
+        <TouchableOpacity
+          style={[
+            styles.button,
+            { backgroundColor: Colors[colorScheme].background },
+          ]}
           onPress={handleGoogleSignIn}
         >
-          <Ionicons name="logo-google" size={20} color={Colors[colorScheme].text} style={styles.icon} />
-          <ThemedText style={styles.buttonText}>Continue with Google</ThemedText>
+          <Ionicons
+            name="logo-google"
+            size={20}
+            color={Colors[colorScheme].text}
+            style={styles.icon}
+          />
+          <ThemedText style={styles.buttonText}>
+            Continue with Google
+          </ThemedText>
         </TouchableOpacity>
 
-        <TouchableOpacity 
-          style={[styles.button, styles.anonymousButton, { backgroundColor: Colors[colorScheme].background }]} 
+        <TouchableOpacity
+          style={[
+            styles.button,
+            styles.anonymousButton,
+            { backgroundColor: Colors[colorScheme].background },
+          ]}
           onPress={handleAnonymousSignIn}
         >
-          <Ionicons name="person-outline" size={20} color={Colors[colorScheme].text} style={styles.icon} />
+          <Ionicons
+            name="person-outline"
+            size={20}
+            color={Colors[colorScheme].text}
+            style={styles.icon}
+          />
           <ThemedText style={styles.buttonText}>Continue as Guest</ThemedText>
         </TouchableOpacity>
-        
+
         <ThemedText style={styles.footerText}>
           By continuing, you agree to Routiner's Terms of Use and Privacy Policy
         </ThemedText>
@@ -102,15 +150,15 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   backgroundImage: {
     flex: 1,
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   container: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
     padding: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)', // Slight overlay to ensure text readability
+    backgroundColor: "rgba(255, 255, 255, 0.1)", // Slight overlay to ensure text readability
   },
   title: {
     textAlign: "center",
