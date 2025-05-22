@@ -1,66 +1,72 @@
-import { StyleSheet, Platform, TouchableOpacity, Alert } from 'react-native';
-import { useAuth } from '@/app/context/AuthContext';
-import { Collapsible } from '@/components/Collapsible';
-import { ExternalLink } from '@/components/ExternalLink';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { IconSymbol } from '@/components/ui/IconSymbol';
+import { StyleSheet, Platform, TouchableOpacity, Alert } from "react-native";
+import { useAuth } from "@/context/AuthContext";
+import { Collapsible } from "@/components/Collapsible";
+import { ExternalLink } from "@/components/ExternalLink";
+import ParallaxScrollView from "@/components/ParallaxScrollView";
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
+import { IconSymbol } from "@/components/ui/IconSymbol";
 
 export default function SettingsScreen() {
-  const { user, signOut, linkWithGoogle, linkWithApple, isAppleSignInAvailable } = useAuth();
+  const {
+    user,
+    signOut,
+    linkWithGoogle,
+    linkWithApple,
+    isAppleSignInAvailable,
+  } = useAuth();
 
   const handleLogout = () => {
-    if (Platform.OS === 'web') {
+    if (Platform.OS === "web") {
       // For web, use a simple confirmation
-      if ((globalThis as any).confirm('Are you sure you want to logout?')) {
-        signOut().catch(error => {
-          console.error('Logout error:', error);
-          (globalThis as any).alert('Failed to logout. Please try again.');
+      if ((globalThis as any).confirm("Are you sure you want to logout?")) {
+        signOut().catch((error) => {
+          console.error("Logout error:", error);
+          (globalThis as any).alert("Failed to logout. Please try again.");
         });
       }
     } else {
       // For native platforms, use Alert.alert
-      Alert.alert(
-        'Logout',
-        'Are you sure you want to logout?',
-        [
-          {
-            text: 'Cancel',
-            style: 'cancel',
+      Alert.alert("Logout", "Are you sure you want to logout?", [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Logout",
+          style: "destructive",
+          onPress: () => {
+            signOut().catch((error) => {
+              console.error("Logout error:", error);
+              Alert.alert("Error", "Failed to logout. Please try again.");
+            });
           },
-          {
-            text: 'Logout',
-            style: 'destructive',
-            onPress: () => {
-              signOut().catch(error => {
-                console.error('Logout error:', error);
-                Alert.alert('Error', 'Failed to logout. Please try again.');
-              });
-            },
-          },
-        ]
-      );
+        },
+      ]);
     }
   };
 
-  const handleLinkAccount = async (provider: 'google' | 'apple') => {
+  const handleLinkAccount = async (provider: "google" | "apple") => {
     try {
-      if (provider === 'google') {
+      if (provider === "google") {
         await linkWithGoogle();
-      } else if (provider === 'apple' && Platform.OS === 'ios' && isAppleSignInAvailable) {
+      } else if (
+        provider === "apple" &&
+        Platform.OS === "ios" &&
+        isAppleSignInAvailable
+      ) {
         await linkWithApple();
       }
-      Alert.alert('Success', 'Account linked successfully!');
+      Alert.alert("Success", "Account linked successfully!");
     } catch (error) {
-      console.error('Error linking account:', error);
-      Alert.alert('Error', 'Failed to link account. Please try again.');
+      console.error("Error linking account:", error);
+      Alert.alert("Error", "Failed to link account. Please try again.");
     }
   };
 
   return (
     <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
+      headerBackgroundColor={{ light: "#D0D0D0", dark: "#353636" }}
       headerImage={
         <IconSymbol
           size={310}
@@ -68,7 +74,8 @@ export default function SettingsScreen() {
           name="chevron.left.forwardslash.chevron.right"
           style={styles.headerImage}
         />
-      }>
+      }
+    >
       <ThemedView style={styles.container}>
         {/* User Profile Section */}
         <ThemedView style={styles.section}>
@@ -79,25 +86,31 @@ export default function SettingsScreen() {
           </ThemedView>
           <ThemedView style={styles.profileItem}>
             <ThemedText style={styles.label}>Display Name</ThemedText>
-            <ThemedText style={styles.value}>{user?.displayName || 'Not set'}</ThemedText>
+            <ThemedText style={styles.value}>
+              {user?.displayName || "Not set"}
+            </ThemedText>
           </ThemedView>
         </ThemedView>
 
         {/* Account Linking Section */}
         <ThemedView style={styles.section}>
           <ThemedText style={styles.sectionTitle}>Linked Accounts</ThemedText>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.linkButton}
-            onPress={() => handleLinkAccount('google')}
+            onPress={() => handleLinkAccount("google")}
           >
-            <ThemedText style={styles.linkButtonText}>Link Google Account</ThemedText>
+            <ThemedText style={styles.linkButtonText}>
+              Link Google Account
+            </ThemedText>
           </TouchableOpacity>
-          {Platform.OS === 'ios' && isAppleSignInAvailable && (
-            <TouchableOpacity 
+          {Platform.OS === "ios" && isAppleSignInAvailable && (
+            <TouchableOpacity
               style={styles.linkButton}
-              onPress={() => handleLinkAccount('apple')}
+              onPress={() => handleLinkAccount("apple")}
             >
-              <ThemedText style={styles.linkButtonText}>Link Apple Account</ThemedText>
+              <ThemedText style={styles.linkButtonText}>
+                Link Apple Account
+              </ThemedText>
             </TouchableOpacity>
           )}
         </ThemedView>
@@ -132,10 +145,10 @@ export default function SettingsScreen() {
 
 const styles = StyleSheet.create({
   headerImage: {
-    color: '#808080',
+    color: "#808080",
     bottom: -90,
     left: -35,
-    position: 'absolute',
+    position: "absolute",
   },
   container: {
     flex: 1,
@@ -145,8 +158,8 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     padding: 16,
     borderRadius: 12,
-    backgroundColor: Platform.select({ ios: '#ffffff', android: '#ffffff' }),
-    shadowColor: '#000',
+    backgroundColor: Platform.select({ ios: "#ffffff", android: "#ffffff" }),
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -154,50 +167,50 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 16,
   },
   profileItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: "#eee",
   },
   label: {
     fontSize: 16,
-    color: '#666',
+    color: "#666",
   },
   value: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   link: {
-    color: '#007AFF',
+    color: "#007AFF",
     fontSize: 16,
   },
   logoutButton: {
-    backgroundColor: '#FF3B30',
+    backgroundColor: "#FF3B30",
     padding: 16,
     borderRadius: 12,
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 24,
   },
   logoutText: {
-    color: '#ffffff',
+    color: "#ffffff",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   linkButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: "#007AFF",
     padding: 12,
     borderRadius: 8,
     marginBottom: 8,
   },
   linkButtonText: {
-    color: '#ffffff',
+    color: "#ffffff",
     fontSize: 16,
-    textAlign: 'center',
+    textAlign: "center",
   },
 });

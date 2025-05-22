@@ -1,62 +1,81 @@
-import { View, Text, StyleSheet, ImageBackground, Pressable } from 'react-native';
+// app/(tabs)/index.tsx
+import React from 'react';
+import {
+  SafeAreaView,
+  View,
+  Text,
+  Pressable,
+  Dimensions,
+  FlatList,
+  Platform,
+} from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Link } from 'expo-router';
+import { styles } from '@/components/styles';
 
+const { width } = Dimensions.get('window');
 
-const App: React.FC = () => {
+// Sample habit data (replace with real data source)
+const habits = [
+  { id: '1', title: 'Drink Water', done: true },
+  { id: '2', title: 'Meditate', done: false },
+  { id: '3', title: 'Exercise', done: false },
+  { id: '4', title: 'Read Book', done: true },
+];
+
+const HomeScreen: React.FC = () => {
+  const completedCount = habits.filter((h) => h.done).length;
+  const progressPercent = Math.round((completedCount / habits.length) * 100);
+
   return (
-    <View style={styles.container}>
-      
-      <Text style={styles.title}>R O U T I N E R</Text>
+    <LinearGradient
+      colors={['#0f0c29', '#302b63', '#24243e']}
+      style={styles.background}
+    >
+      <SafeAreaView style={styles.container}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.title}>Routiner</Text>
+          <Text style={styles.subtitle}>Build your habits, build your future</Text>
+        </View>
 
-      <Link href="../screens/LoginScreen" style={{ marginHorizontal: 'auto' }} asChild>
-        <Pressable style={styles.button}>
-          <Text style={styles.buttonText}>Login Screen!!1</Text>
-        </Pressable>
-      </Link>
-      
-      <Link href="../screens/EventsScreen" style={{ marginHorizontal: 'auto' }} asChild>
-        <Pressable style={styles.button}>
-          <Text style={styles.buttonText}>Events Screen!1!</Text>
-        </Pressable>
-      </Link>
-    </View>
+        {/* Progress */}
+        <View style={styles.progressContainer}>
+          <View style={styles.progressCircle}>
+            <Text style={styles.progressText}>{progressPercent}%</Text>
+          </View>
+        </View>
+
+        {/* Habits List */}
+        <FlatList
+          data={habits}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.listContainer}
+          renderItem={({ item }) => (
+            <View style={styles.habitCard}>
+              <Text
+                style={[
+                  styles.cardText,
+                  item.done && styles.correctText,
+                ]}
+              >
+                {item.done ? '✓' : '○'} {item.title}
+              </Text>
+            </View>
+          )}
+        />
+
+        {/* Floating Add Button */}
+        <View style={styles.footer}>
+          <Link href="/habits/add" asChild>
+            <Pressable style={styles.addButton}>
+              <Text style={styles.addButtonText}>+</Text>
+            </Pressable>
+          </Link>
+        </View>
+      </SafeAreaView>
+    </LinearGradient>
   );
 };
 
-export default App;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    flexDirection: 'column',
-  },
-  image: {
-    width: '100%',
-    height: '100%',
-    flex: 1,
-    resizeMode: 'cover',
-    justifyContent: 'center',
-  },
-  title: {
-    color: 'white',
-    fontSize: 42,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    marginBottom: 120,
-  },
-  button: {
-    height: 60,
-    borderRadius: 20,
-    justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,0.75)',
-    padding: 6,
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    padding: 4,
-  },
-});
+export default HomeScreen;
