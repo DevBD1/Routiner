@@ -12,7 +12,7 @@
     "components/**/*", // your shared styles/components
     "types/**/*",
     "constants/styles.ts",
-    //"components/ui"
+    "components/ui",
     "components/Collapsible.tsx",
     "components/HelloWave.tsx"
   ],
