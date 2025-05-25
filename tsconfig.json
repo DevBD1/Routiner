@@ -10,7 +10,11 @@
   "include": [
     "app/**/*", // ← include Expo Router’s app folder
     "components/**/*", // your shared styles/components
-    "types/**/*"
+    "types/**/*",
+    "constants/styles.ts",
+    //"components/ui"
+    "components/Collapsible.tsx",
+    "components/HelloWave.tsx"
   ],
   "exclude": [".git", "node_modules", "dist"]
 }
