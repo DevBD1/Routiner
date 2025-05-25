@@ -1,5 +1,5 @@
 // app/(tabs)/index.tsx
-import React from 'react';
+import React from "react";
 import {
   SafeAreaView,
   View,
@@ -7,19 +7,19 @@ import {
   Pressable,
   Dimensions,
   FlatList,
-} from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Link } from 'expo-router';
-import { styles } from '@/components/styles';
+} from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { Link } from "expo-router";
+import { styles } from "@/constants/styles";
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 
 // Sample habit data (replace with real data source)
 const habits = [
-  { id: '1', title: 'Drink Water', done: true },
-  { id: '2', title: 'Meditate', done: false },
-  { id: '3', title: 'Exercise', done: false },
-  { id: '4', title: 'Read Book', done: true },
+  { id: "1", title: "Drink Water", done: true },
+  { id: "2", title: "Meditate", done: false },
+  { id: "3", title: "Exercise", done: false },
+  { id: "4", title: "Read Book", done: true },
 ];
 
 const HomeScreen: React.FC = () => {
@@ -28,14 +28,16 @@ const HomeScreen: React.FC = () => {
 
   return (
     <LinearGradient
-      colors={['#0f0c29', '#302b63', '#24243e']}
+      colors={["#0f0c29", "#302b63", "#24243e"]}
       style={styles.background}
     >
       <SafeAreaView style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title}>Routiner</Text>
-          <Text style={styles.subtitle}>Build your habits, build your future</Text>
+          <Text style={styles.subtitle}>
+            Build your habits, build your future
+          </Text>
         </View>
 
         {/* Progress */}
@@ -52,13 +54,8 @@ const HomeScreen: React.FC = () => {
           contentContainerStyle={styles.listContainer}
           renderItem={({ item }) => (
             <View style={styles.habitCard}>
-              <Text
-                style={[
-                  styles.cardText,
-                  item.done && styles.correctText,
-                ]}
-              >
-                {item.done ? '✓' : '○'} {item.title}
+              <Text style={[styles.cardText, item.done && styles.correctText]}>
+                {item.done ? "✓" : "○"} {item.title}
               </Text>
             </View>
           )}
