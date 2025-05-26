@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Link } from "expo-router";
+// Shared styles import
 import { styles } from "@/constants/styles";
 
 const { width } = Dimensions.get("window");
@@ -53,10 +54,38 @@ const HomeScreen: React.FC = () => {
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContainer}
           renderItem={({ item }) => (
-            <View style={styles.habitCard}>
-              <Text style={[styles.cardText, item.done && styles.correctText]}>
-                {item.done ? "✓" : "○"} {item.title}
-              </Text>
+            <View
+              style={[
+                styles.habitCard,
+                {
+                  backgroundColor: "transparent",
+                  borderBottomWidth: 1,
+                  borderBottomColor: "rgba(255,255,255,0.2)",
+                  paddingVertical: 8,
+                  paddingHorizontal: 0,
+                },
+              ]}
+            >
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <Text
+                  style={[
+                    styles.cardText,
+                    item.done && styles.correctText,
+                    { fontWeight: "300", marginRight: 12 },
+                  ]}
+                >
+                  {item.done ? "✓" : "○"}
+                </Text>
+                <Text
+                  style={[
+                    styles.cardText,
+                    item.done && styles.correctText,
+                    { fontWeight: "300" },
+                  ]}
+                >
+                  {item.title}
+                </Text>
+              </View>
             </View>
           )}
         />
