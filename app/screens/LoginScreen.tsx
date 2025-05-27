@@ -1,9 +1,7 @@
 import React from "react";
 import {
-  View,
   TouchableOpacity,
   StyleSheet,
-  Platform,
   ActivityIndicator,
   ImageBackground,
 } from "react-native";
@@ -12,7 +10,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useRouter } from "expo-router";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import { Colors } from "@/constants/colors";
+import { colors } from "@/constants/colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 
 export default function LoginScreen() {
@@ -64,7 +62,7 @@ export default function LoginScreen() {
         style={styles.backgroundImage}
       >
         <ThemedView style={styles.container}>
-          <ActivityIndicator size="large" color={Colors[colorScheme].tint} />
+          <ActivityIndicator size="large" color={colors[colorScheme].tint} />
         </ThemedView>
       </ImageBackground>
     );
@@ -88,14 +86,14 @@ export default function LoginScreen() {
           <TouchableOpacity
             style={[
               styles.button,
-              { backgroundColor: Colors[colorScheme].background },
+              { backgroundColor: colors[colorScheme].background },
             ]}
             onPress={handleAppleSignIn}
           >
             <Ionicons
               name="logo-apple"
               size={20}
-              color={Colors[colorScheme].text}
+              color={colors[colorScheme].text}
               style={styles.icon}
             />
             <ThemedText style={styles.buttonText}>
@@ -107,14 +105,14 @@ export default function LoginScreen() {
         <TouchableOpacity
           style={[
             styles.button,
-            { backgroundColor: Colors[colorScheme].background },
+            { backgroundColor: colors[colorScheme].background },
           ]}
           onPress={handleGoogleSignIn}
         >
           <Ionicons
             name="logo-google"
             size={20}
-            color={Colors[colorScheme].text}
+            color={colors[colorScheme].text}
             style={styles.icon}
           />
           <ThemedText style={styles.buttonText}>
@@ -126,14 +124,14 @@ export default function LoginScreen() {
           style={[
             styles.button,
             styles.anonymousButton,
-            { backgroundColor: Colors[colorScheme].background },
+            { backgroundColor: colors[colorScheme].background },
           ]}
           onPress={handleAnonymousSignIn}
         >
           <Ionicons
             name="person-outline"
             size={20}
-            color={Colors[colorScheme].text}
+            color={colors[colorScheme].text}
             style={styles.icon}
           />
           <ThemedText style={styles.buttonText}>Continue as Guest</ThemedText>

@@ -6,7 +6,7 @@ import { createTabIcon } from "@/components/ui/IconSymbol";
 
 import { HapticTab } from "@/components/HapticTab";
 import TabBarBackground from "@/components/ui/TabBarBackground";
-import { Colors } from "@/constants/colors";
+import { colors } from "@/constants/colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 
 const tabBarColors = {
@@ -48,7 +48,7 @@ export default function TabLayout() {
         headerTransparent: false,
         headerStyle: commonHeaderStyle,
 
-        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
+        tabBarActiveTintColor: colors[colorScheme ?? "light"].tint,
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
         tabBarStyle: Platform.select({
@@ -63,10 +63,6 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{ tabBarIcon: createTabIcon("home") }}
-      />
-      <Tabs.Screen
-        name="settings"
-        options={{ tabBarIcon: createTabIcon("school") }}
       />
     </Tabs>
   );
