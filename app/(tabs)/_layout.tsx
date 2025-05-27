@@ -47,17 +47,24 @@ export default function TabLayout() {
         headerTintColor: tabBarColors.inactive,
         headerTransparent: false,
         headerStyle: commonHeaderStyle,
+        headerLeft: () => null,
+        headerRight: () => null,
 
         tabBarActiveTintColor: colors[colorScheme ?? "light"].tint,
+        tabBarInactiveTintColor: tabBarColors.inactive,
+        tabBarShowLabel: false,
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: "absolute",
-          },
-          default: {},
-        }),
+        tabBarStyle: {
+          ...commonTabBarStyle,
+          ...Platform.select({
+            ios: {
+              // on iOS we want it absolute so the blur shows through
+              position: "absolute",
+            },
+            default: {}, // on Android/web etc. just stick to commonTabBarStyle
+          }),
+        },
       }}
     >
       <Tabs.Screen
