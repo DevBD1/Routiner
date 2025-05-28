@@ -14,6 +14,7 @@ import { useColorScheme } from "@/hooks/useColorScheme";
 import { AuthProvider, useAuth } from "../context/AuthContext";
 import { HabitsProvider } from "../context/HabitsContext";
 import { SettingsProvider } from "../context/SettingsContext";
+import { PremiumProvider } from "../context/PremiumContext";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -71,9 +72,11 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <AuthProvider>
         <SettingsProvider>
-          <HabitsProvider>
-            <RootLayoutNav />
-          </HabitsProvider>
+          <PremiumProvider>
+            <HabitsProvider>
+              <RootLayoutNav />
+            </HabitsProvider>
+          </PremiumProvider>
         </SettingsProvider>
       </AuthProvider>
     </GestureHandlerRootView>

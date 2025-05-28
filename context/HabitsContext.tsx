@@ -11,43 +11,21 @@ export interface Habit {
   goalUnit: string | null;
   goalType: 'min' | 'max' | 'precise' | null;
   repeatEnabled: boolean;
-  repeatType: 'none' | 'daily' | 'weekly' | 'monthly';
+  repeatType: 'none' | 'daily' | 'weekly' | 'monthly' | null;
   repeatEvery: number | null;
+  repeatDate: string | null;
   repeatDaysOfWeek: number[] | null;
   repeatDaysOfMonth: number[] | null;
-  repeatDate: string | null;
+  currentValue: number;
+  lastUpdated: string | null;
 }
 
 interface HabitsContextType {
   habits: Habit[];
-  addHabit: (title: string, goal?: {
-    goalEnabled: boolean;
-    goalValue: number | null;
-    goalUnit: string | null;
-    goalType: 'min' | 'max' | 'precise' | null;
-  }, repeat?: {
-    repeatEnabled: boolean;
-    repeatType: 'none' | 'daily' | 'weekly' | 'monthly';
-    repeatEvery: number | null;
-    repeatDaysOfWeek: number[] | null;
-    repeatDaysOfMonth: number[] | null;
-    repeatDate: string | null;
-  }) => Promise<void>;
-  toggleHabit: (id: string) => Promise<void>;
-  deleteHabit: (id: string) => Promise<void>;
-  editHabit: (id: string, newTitle: string, goal?: {
-    goalEnabled: boolean;
-    goalValue: number | null;
-    goalUnit: string | null;
-    goalType: 'min' | 'max' | 'precise' | null;
-  }, repeat?: {
-    repeatEnabled: boolean;
-    repeatType: 'none' | 'daily' | 'weekly' | 'monthly';
-    repeatEvery: number | null;
-    repeatDaysOfWeek: number[] | null;
-    repeatDaysOfMonth: number[] | null;
-    repeatDate: string | null;
-  }) => Promise<void>;
+  addHabit: (habit: Omit<Habit, 'id' | 'done' | 'currentValue' | 'lastUpdated'>) => void;
+  toggleHabit: (id: string) => void;
+  deleteHabit: (id: string) => void;
+  updateHabit: (id: string, habit: Habit) => void;
 }
 
 const HabitsContext = createContext<HabitsContextType | undefined>(undefined);
@@ -79,91 +57,44 @@ export function HabitsProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const addHabit = async (title: string, goal?: {
-    goalEnabled: boolean;
-    goalValue: number | null;
-    goalUnit: string | null;
-    goalType: 'min' | 'max' | 'precise' | null;
-  }, repeat?: {
-    repeatEnabled: boolean;
-    repeatType: 'none' | 'daily' | 'weekly' | 'monthly';
-    repeatEvery: number | null;
-    repeatDaysOfWeek: number[] | null;
-    repeatDaysOfMonth: number[] | null;
-    repeatDate: string | null;
-  }) => {
+  const addHabit = (habit: Omit<Habit, 'id' | 'done' | 'currentValue' | 'lastUpdated'>) => {
     const newHabit: Habit = {
+      ...habit,
       id: Date.now().toString(),
-      title,
       done: false,
       createdAt: Date.now(),
-      goalEnabled: goal?.goalEnabled ?? false,
-      goalValue: goal?.goalValue ?? null,
-      goalUnit: goal?.goalUnit ?? null,
-      goalType: goal?.goalType ?? null,
-      repeatEnabled: repeat?.repeatEnabled ?? false,
-      repeatType: repeat?.repeatType ?? 'none',
-      repeatEvery: repeat?.repeatEvery ?? null,
-      repeatDaysOfWeek: repeat?.repeatDaysOfWeek ?? null,
-      repeatDaysOfMonth: repeat?.repeatDaysOfMonth ?? null,
-      repeatDate: repeat?.repeatDate ?? null,
+      currentValue: 0,
+      lastUpdated: null,
     };
-    const updatedHabits = [...habits, newHabit];
-    setHabits(updatedHabits);
-    await saveHabits(updatedHabits);
+    const newHabits = [...habits, newHabit];
+    setHabits(newHabits);
+    saveHabits(newHabits);
   };
 
-  const toggleHabit = async (id: string) => {
-    const updatedHabits = habits.map(habit =>
+  const toggleHabit = (id: string) => {
+    const newHabits = habits.map(habit =>
       habit.id === id ? { ...habit, done: !habit.done } : habit
     );
-    setHabits(updatedHabits);
-    await saveHabits(updatedHabits);
+    setHabits(newHabits);
+    saveHabits(newHabits);
   };
 
-  const deleteHabit = async (id: string) => {
-    const updatedHabits = habits.filter(habit => habit.id !== id);
-    setHabits(updatedHabits);
-    await saveHabits(updatedHabits);
+  const deleteHabit = (id: string) => {
+    const newHabits = habits.filter(habit => habit.id !== id);
+    setHabits(newHabits);
+    saveHabits(newHabits);
   };
 
-  const editHabit = async (id: string, newTitle: string, goal?: {
-    goalEnabled: boolean;
-    goalValue: number | null;
-    goalUnit: string | null;
-    goalType: 'min' | 'max' | 'precise' | null;
-  }, repeat?: {
-    repeatEnabled: boolean;
-    repeatType: 'none' | 'daily' | 'weekly' | 'monthly';
-    repeatEvery: number | null;
-    repeatDaysOfWeek: number[] | null;
-    repeatDaysOfMonth: number[] | null;
-    repeatDate: string | null;
-  }) => {
-    const updatedHabits = habits.map(habit =>
-      habit.id === id
-        ? {
-            ...habit,
-            title: newTitle,
-            goalEnabled: goal?.goalEnabled ?? habit.goalEnabled,
-            goalValue: goal?.goalValue ?? habit.goalValue,
-            goalUnit: goal?.goalUnit ?? habit.goalUnit,
-            goalType: goal?.goalType ?? habit.goalType,
-            repeatEnabled: repeat?.repeatEnabled ?? habit.repeatEnabled,
-            repeatType: repeat?.repeatType ?? habit.repeatType,
-            repeatEvery: repeat?.repeatEvery ?? habit.repeatEvery,
-            repeatDaysOfWeek: repeat?.repeatDaysOfWeek ?? habit.repeatDaysOfWeek,
-            repeatDaysOfMonth: repeat?.repeatDaysOfMonth ?? habit.repeatDaysOfMonth,
-            repeatDate: repeat?.repeatDate ?? habit.repeatDate,
-          }
-        : habit
+  const updateHabit = (id: string, updatedHabit: Habit) => {
+    const newHabits = habits.map(habit =>
+      habit.id === id ? updatedHabit : habit
     );
-    setHabits(updatedHabits);
-    await saveHabits(updatedHabits);
+    setHabits(newHabits);
+    saveHabits(newHabits);
   };
 
   return (
-    <HabitsContext.Provider value={{ habits, addHabit, toggleHabit, deleteHabit, editHabit }}>
+    <HabitsContext.Provider value={{ habits, addHabit, toggleHabit, deleteHabit, updateHabit }}>
       {children}
     </HabitsContext.Provider>
   );

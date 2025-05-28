@@ -7,7 +7,7 @@ import { useSettings } from '@/context/SettingsContext';
 interface ProgressBarProps {
   progress: number; // 0 to 1
   height?: number;
-  goalType?: 'min' | 'max' | 'precise';
+  goalType?: 'min' | 'max' | 'precise' | null;
 }
 
 export const ProgressBar: React.FC<ProgressBarProps> = ({ 

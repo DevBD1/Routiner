@@ -7,6 +7,7 @@ import { useColorScheme } from "@/hooks/useColorScheme";
 import { createTabIcon } from "@/components/ui/IconSymbol";
 import { ProgressBar } from "@/components/ProgressBar";
 import { Swipeable } from "react-native-gesture-handler";
+import { useRouter } from 'expo-router';
 
 export interface HabitCardProps {
   habit: any;
@@ -58,6 +59,7 @@ const renderRightActions = (
 };
 
 export const HabitCard: React.FC<HabitCardProps> = ({ habit, onToggle, onEdit, onDelete }) => {
+  const router = useRouter();
   const colorScheme = useColorScheme() ?? "light";
   const iconColor = habit.done ? colors[colorScheme].correct : colors[colorScheme].tabIconDefault;
   const goalColor = habit.goalEnabled ? colors[colorScheme].tint : colors[colorScheme].tabIconDefault;
@@ -73,13 +75,21 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit, onToggle, onEdit, o
   const progress = habit.goalEnabled && habit.goalValue ? 
     Math.min(1, (habit.currentValue || 0) / habit.goalValue) : 0;
 
+  const handlePress = () => {
+    if (habit.goalEnabled) {
+      router.push(`/habits/log/${habit.id}`);
+    } else {
+      onToggle();
+    }
+  };
+
   return (
     <Swipeable
       renderRightActions={(progress, dragX) => renderRightActions(progress, dragX, onDelete)}
       rightThreshold={40}
     >
       <ThemedView style={[styles.card, { backgroundColor: colors[colorScheme].frame, shadowColor: colors[colorScheme].text }]}> 
-        <Pressable onPress={onToggle} style={{ flex: 1 }}>
+        <Pressable onPress={handlePress} style={{ flex: 1 }}>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             {/* Completion Icon */}
             <View style={{ marginRight: 12 }}>{createTabIcon(doneIcon)({ color: iconColor })}</View>
