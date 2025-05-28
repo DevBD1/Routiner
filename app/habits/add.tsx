@@ -9,6 +9,7 @@ import {
   Platform,
   Switch,
 } from "react-native";
+import { Picker } from '@react-native-picker/picker';
 import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -35,7 +36,8 @@ const AddHabitScreen: React.FC = () => {
   const [goalValue, setGoalValue] = useState<string>("");
   const [goalUnit, setGoalUnit] = useState<string>(UNITS[0]);
   const [goalType, setGoalType] = useState<'min' | 'max' | 'precise'>("min");
-  const { addHabit } = useHabits();
+  const [error, setError] = useState<string>("");
+  const { addHabit, habits } = useHabits();
 
   const darkGradient: [ColorValue, ColorValue, ColorValue] = [
     "#151718",
@@ -49,7 +51,24 @@ const AddHabitScreen: React.FC = () => {
   ];
 
   const handleAddHabit = async () => {
-    if (!habitName.trim()) return;
+    setError("");
+    if (!habitName.trim()) {
+      setError("Please enter a habit name.");
+      return;
+    }
+    // Duplicate name check
+    const exists = habits.some(h => h.title.trim().toLowerCase() === habitName.trim().toLowerCase());
+    if (exists) {
+      setError("A habit with this name already exists.");
+      return;
+    }
+    if (goalEnabled) {
+      const value = parseInt(goalValue, 10);
+      if (!goalValue || isNaN(value) || value <= 0) {
+        setError("Please enter a valid positive number for the goal value.");
+        return;
+      }
+    }
     try {
       await addHabit(habitName.trim(), goalEnabled ? {
         goalEnabled,
@@ -64,6 +83,7 @@ const AddHabitScreen: React.FC = () => {
       });
       router.back();
     } catch (error) {
+      setError('Error adding habit.');
       console.error('Error adding habit:', error);
     }
   };
@@ -134,14 +154,17 @@ const AddHabitScreen: React.FC = () => {
                     }}
                   />
                   {/* Unit Picker */}
-                  <View style={{ borderBottomWidth: 1, borderBottomColor: colors[colorScheme].tabIconDefault }}>
-                    <TextInput
-                      value={goalUnit}
-                      onChangeText={setGoalUnit}
-                      style={{ fontSize: 16, color: colors[colorScheme].text, width: 70 }}
-                      placeholder="Unit"
-                      placeholderTextColor={colors[colorScheme].tabIconDefault}
-                    />
+                  <View style={{ flex: 1, marginLeft: 8 }}>
+                    <Picker
+                      selectedValue={goalUnit}
+                      onValueChange={setGoalUnit}
+                      style={{ color: colors[colorScheme].text, backgroundColor: 'transparent' }}
+                      dropdownIconColor={colors[colorScheme].text}
+                    >
+                      {UNITS.map((unit) => (
+                        <Picker.Item key={unit} label={unit} value={unit} />
+                      ))}
+                    </Picker>
                   </View>
                 </View>
                 {/* Goal Type Picker */}
@@ -167,6 +190,9 @@ const AddHabitScreen: React.FC = () => {
                   ))}
                 </View>
               </View>
+            )}
+            {!!error && (
+              <ThemedText style={{ color: colors[colorScheme].error, marginTop: 12 }}>{error}</ThemedText>
             )}
           </ThemedView>
 
