@@ -1,17 +1,30 @@
 import React from "react";
-import { View, Switch, StyleSheet } from "react-native";
+import { View, Switch, StyleSheet, Pressable } from "react-native";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { colors } from "@/constants/colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { useSettings } from "@/context/SettingsContext";
+import { usePremium } from '@/context/PremiumContext';
 
 export default function SettingsScreen() {
   const colorScheme = useColorScheme() ?? "light";
   const { settings, updateSettings } = useSettings();
+  const { isPremium, activatePremium, deactivatePremium } = usePremium();
 
   return (
     <ThemedView style={styles.container}>
+      <View style={{ alignItems: 'center', marginBottom: 24 }}>
+        <ThemedText style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 8 }}>
+          {isPremium ? '🌟 Premium User' : 'Free User'}
+        </ThemedText>
+        <Pressable onPress={activatePremium} style={[styles.button, { backgroundColor: '#FFD700', marginBottom: 8 }]}> 
+          <ThemedText style={{ color: '#222', fontWeight: 'bold' }}>Activate Premium</ThemedText>
+        </Pressable>
+        <Pressable onPress={deactivatePremium} style={[styles.button, { backgroundColor: '#ccc' }]}> 
+          <ThemedText style={{ color: '#222', fontWeight: 'bold' }}>Deactivate Premium</ThemedText>
+        </Pressable>
+      </View>
       <View style={styles.section}>
         <ThemedText style={styles.sectionTitle}>Habit Settings</ThemedText>
         
@@ -69,5 +82,9 @@ const styles = StyleSheet.create({
   settingDescription: {
     fontSize: 14,
     opacity: 0.7,
+  },
+  button: {
+    padding: 12,
+    borderRadius: 8,
   },
 }); 

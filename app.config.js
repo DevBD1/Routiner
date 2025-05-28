@@ -2,6 +2,7 @@ export default {
   expo: {
     name: "Routiner",
     slug: "routiner",
+    scheme: "routiner",
     version: "1.0.0",
     orientation: "portrait",
     icon: "./assets/images/icon.png",

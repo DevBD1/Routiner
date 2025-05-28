@@ -75,6 +75,10 @@ export default function TabLayout() {
         options={{ tabBarIcon: createTabIcon("home") }}
       />
       <Tabs.Screen
+        name="log-day"
+        options={{ tabBarIcon: createTabIcon("edit"), tabBarLabel: 'Log Day' }}
+      />
+      <Tabs.Screen
         name="settings"
         options={{ tabBarIcon: createTabIcon("settings") }}
       />
