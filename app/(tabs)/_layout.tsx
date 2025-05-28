@@ -17,7 +17,7 @@ const tabBarColors = {
 
 const commonHeaderStyle = {
   backgroundColor: tabBarColors.background,
-  height: 100,
+  height: 60,
   elevation: 0,
   shadowOpacity: 0,
   borderTopWidth: 0,
@@ -26,7 +26,7 @@ const commonHeaderStyle = {
 
 const commonTabBarStyle = {
   backgroundColor: tabBarColors.background,
-  height: 65,
+  height: 60,
   elevation: 0,
   shadowOpacity: 0,
   borderTopWidth: 0,
@@ -47,7 +47,7 @@ export default function TabLayout() {
         headerTintColor: tabBarColors.inactive,
         headerTransparent: false,
         headerStyle: commonHeaderStyle,
-        headerLeft: () => null,
+        headerLeft: () => "Routiner",
         headerRight: () => null,
 
         tabBarActiveTintColor: colors[colorScheme ?? "light"].tint,
