@@ -6,6 +6,7 @@ import {
   Pressable,
   Dimensions,
   FlatList,
+  ColorValue,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Link } from "expo-router";
@@ -15,42 +16,48 @@ import { colors } from "@/constants/colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
+import { useHabits } from "@/context/HabitsContext";
 
 const { width } = Dimensions.get("window");
 
-// Sample habit data (replace with real data source)
-const habits = [
-  { id: "1", title: "Drink Water", done: true },
-  { id: "2", title: "Meditate", done: false },
-  { id: "3", title: "Exercise", done: false },
-  { id: "4", title: "Read Book", done: true },
-];
-
 const HomeScreen: React.FC = () => {
   const colorScheme = useColorScheme() ?? "light";
+  const { habits, toggleHabit } = useHabits();
   const completedCount = habits.filter((h) => h.done).length;
-  const progressPercent = Math.round((completedCount / habits.length) * 100);
+  const progressPercent = habits.length > 0 
+    ? Math.round((completedCount / habits.length) * 100)
+    : 0;
+
+  const darkGradient: [ColorValue, ColorValue, ColorValue] = [
+    "#151718",
+    "#1a1d1e",
+    "#24243e",
+  ];
+  const lightGradient: [ColorValue, ColorValue, ColorValue] = [
+    "#ffffff",
+    "#f5f5f5",
+    "#e8e8e8",
+  ];
 
   return (
     <LinearGradient
-      colors={
-        colorScheme === "light"
-          ? ["#ffffff", "#f5f5f5", "#e8e8e8"]
-          : ["#151718", "#1a1d1e", "#24243e"]
-      }
+      colors={colorScheme === "dark" ? darkGradient : lightGradient}
       style={styles.background}
     >
       <SafeAreaView style={styles.container}>
         {/* Progress */}
         <View style={styles.progressContainer}>
-          <View style={[styles.progressCircle, { backgroundColor: colors[colorScheme].frame, borderColor: colors[colorScheme].text }]}>
+          <View
+            style={[
+              styles.progressCircle,
+              {
+                backgroundColor: colors[colorScheme].frame,
+                borderColor: colors[colorScheme].text,
+              },
+            ]}
+          >
             <ThemedText>{progressPercent}%</ThemedText>
           </View>
-          {/*
-          <ThemedView style={[styles.progressCircle, { backgroundColor: colors[colorScheme].frame, borderColor: colors[colorScheme].text }]}>
-            <ThemedText>{progressPercent}%</ThemedText>
-          </ThemedView>
-          */}
         </View>
 
         {/* Habits List */}
@@ -59,37 +66,39 @@ const HomeScreen: React.FC = () => {
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContainer}
           renderItem={({ item }) => (
-            <ThemedView
-              style={[
-                styles.habitCard,
-                {
-                  backgroundColor: "transparent",
-                  borderBottomWidth: 1,
-                  borderBottomColor: "rgba(255,255,255,0.2)",
-                  paddingVertical: 8,
-                  paddingHorizontal: 0,
-                },
-              ]}
-            >
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <ThemedText
-                  style={[
-                    item.done && styles.correctText,
-                    { fontWeight: "300", marginRight: 12 },
-                  ]}
-                >
-                  {item.done ? "✓" : "○"}
-                </ThemedText>
-                <ThemedText
-                  style={[
-                    item.done && styles.correctText,
-                    { fontWeight: "300" },
-                  ]}
-                >
-                  {item.title}
-                </ThemedText>
-              </View>
-            </ThemedView>
+            <Pressable onPress={() => toggleHabit(item.id)}>
+              <ThemedView
+                style={[
+                  styles.habitCard,
+                  {
+                    backgroundColor: "transparent",
+                    borderBottomWidth: 1,
+                    borderBottomColor: "rgba(255,255,255,0.2)",
+                    paddingVertical: 8,
+                    paddingHorizontal: 0,
+                  },
+                ]}
+              >
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <ThemedText
+                    style={[
+                      item.done && styles.correctText,
+                      { fontWeight: "300", marginRight: 12 },
+                    ]}
+                  >
+                    {item.done ? "✓" : "○"}
+                  </ThemedText>
+                  <ThemedText
+                    style={[
+                      item.done && styles.correctText,
+                      { fontWeight: "300" },
+                    ]}
+                  >
+                    {item.title}
+                  </ThemedText>
+                </View>
+              </ThemedView>
+            </Pressable>
           )}
         />
 
