@@ -109,39 +109,20 @@ const AddHabitScreen: React.FC = () => {
       }
     }
     try {
-      await addHabit(
-        habitName.trim(),
-        goalEnabled
-          ? {
-              goalEnabled,
-              goalValue: goalValue ? parseInt(goalValue, 10) : null,
-              goalUnit,
-              goalType,
-            }
-          : {
-              goalEnabled: false,
-              goalValue: null,
-              goalUnit: null,
-              goalType: null,
-            },
-        repeatEnabled
-          ? {
-              repeatEnabled: true,
-              repeatType,
-              repeatEvery: repeatType === 'none' ? null : repeatEvery,
-              repeatDaysOfWeek: repeatType === 'weekly' ? repeatDaysOfWeek : null,
-              repeatDaysOfMonth: repeatType === 'monthly' ? repeatDaysOfMonth : null,
-              repeatDate: repeatType === 'none' ? repeatDate.toISOString().slice(0, 10) : null,
-            }
-          : {
-              repeatEnabled: false,
-              repeatType: 'none',
-              repeatEvery: null,
-              repeatDaysOfWeek: null,
-              repeatDaysOfMonth: null,
-              repeatDate: repeatDate.toISOString().slice(0, 10),
-            }
-      );
+      await addHabit({
+        title: habitName.trim(),
+        goalEnabled,
+        goalValue: goalEnabled ? parseInt(goalValue, 10) : null,
+        goalUnit: goalEnabled ? goalUnit : null,
+        goalType: goalEnabled ? goalType : null,
+        repeatEnabled,
+        repeatType: repeatEnabled ? repeatType : 'none',
+        repeatEvery: repeatEnabled && repeatType !== 'none' ? repeatEvery : null,
+        repeatDaysOfWeek: repeatEnabled && repeatType === 'weekly' ? repeatDaysOfWeek : null,
+        repeatDaysOfMonth: repeatEnabled && repeatType === 'monthly' ? repeatDaysOfMonth : null,
+        repeatDate: repeatEnabled && repeatType === 'none' ? repeatDate.toISOString().slice(0, 10) : null,
+        createdAt: Date.now(),
+      });
       router.back();
     } catch (error) {
       setError('Error adding habit.');

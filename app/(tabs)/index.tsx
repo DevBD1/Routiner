@@ -18,6 +18,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { useHabits } from "@/context/HabitsContext";
 import { HabitCard } from "@/components/HabitCard";
+import { usePremium } from '@/context/PremiumContext';
 
 const { width } = Dimensions.get("window");
 
@@ -48,6 +49,7 @@ const HomeScreen: React.FC = () => {
   const progressPercent = habits.length > 0 
     ? Math.round((completedCount / habits.length) * 100)
     : 0;
+  const { isPremium } = usePremium();
 
   const darkGradient: [ColorValue, ColorValue, ColorValue] = [
     "#151718",
@@ -61,51 +63,58 @@ const HomeScreen: React.FC = () => {
   ];
 
   return (
-    <LinearGradient
-      colors={colorScheme === "dark" ? darkGradient : lightGradient}
-      style={styles.background}
-    >
-      <SafeAreaView style={styles.container}>
-        {/* Progress */}
-        <View style={styles.progressContainer}>
-          <View
-            style={[
-              styles.progressCircle,
-              {
-                backgroundColor: colors[colorScheme].frame,
-                borderColor: colors[colorScheme].text,
-              },
-            ]}
-          >
-            <ThemedText>{progressPercent}%</ThemedText>
+    <ThemedView style={styles.container}>
+      <View style={{ alignItems: 'center', marginBottom: 16 }}>
+        <ThemedText style={{ fontWeight: 'bold', fontSize: 16 }}>
+          {isPremium ? '🌟 Premium User' : 'Free User'}
+        </ThemedText>
+      </View>
+      <LinearGradient
+        colors={colorScheme === "dark" ? darkGradient : lightGradient}
+        style={styles.background}
+      >
+        <SafeAreaView style={styles.container}>
+          {/* Progress */}
+          <View style={styles.progressContainer}>
+            <View
+              style={[
+                styles.progressCircle,
+                {
+                  backgroundColor: colors[colorScheme].frame,
+                  borderColor: colors[colorScheme].text,
+                },
+              ]}
+            >
+              <ThemedText>{progressPercent}%</ThemedText>
+            </View>
           </View>
-        </View>
 
-        {/* Habits List */}
-        <FlatList
-          data={habits}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.listContainer}
-          renderItem={({ item }) => (
-            <HabitCard
-              habit={item}
-              onToggle={() => toggleHabit(item.id)}
-              onEdit={() => router.push(`/habits/edit/${item.id}`)}
-              onDelete={() => deleteHabit(item.id)}
-            />
-          )}
-        />
+          {/* Habits List */}
+          <FlatList
+            data={habits}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.listContainer}
+            renderItem={({ item }) => (
+              <HabitCard
+                habit={item}
+                onToggle={() => toggleHabit(item.id)}
+                onEdit={() => router.push(`/habits/edit/${item.id}`)}
+                onDelete={() => deleteHabit(item.id)}
+              />
+            )}
+          />
 
-        {/* Floating Add Button */}
-        <View style={styles.footer}>
-          <Link href="/habits/add" asChild>
-            <Pressable style={styles.addButton}>
-              <ThemedText>+</ThemedText>
-            </Pressable>
-          </Link>
-        </View>
-      </SafeAreaView>
-    </LinearGradient>
+          {/* Floating Add Button */}
+          <View style={styles.footer}>
+            <Link href="/habits/add" asChild>
+              <Pressable style={styles.addButton}>
+                <ThemedText>+</ThemedText>
+              </Pressable>
+            </Link>
+          </View>
+        </SafeAreaView>
+      </LinearGradient>
+    </ThemedView>
   );
 };
 

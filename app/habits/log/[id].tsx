@@ -150,23 +150,34 @@ export default function LogHabitScreen() {
               placeholder="Describe what you did..."
               placeholderTextColor={colors[colorScheme].tabIconDefault}
               multiline
+              editable={isPremium}
             />
             <Pressable 
               style={[
                 styles.logButton, 
-                { backgroundColor: colors[colorScheme].tint },
+                { backgroundColor: isPremium ? colors[colorScheme].tint : colors[colorScheme].tabIconDefault },
                 isAiProcessing && styles.disabledButton
               ]}
-              onPress={handleAiLog}
-              disabled={isAiProcessing}
+              onPress={isPremium ? handleAiLog : () => router.push('/premium')}
+              disabled={isAiProcessing || !isPremium}
             >
               {isAiProcessing ? (
                 <ActivityIndicator color={colors[colorScheme].background} />
               ) : (
-                <ThemedText style={styles.buttonText}>Process</ThemedText>
+                <ThemedText style={styles.buttonText}>
+                  {isPremium ? 'Process' : 'Upgrade'}
+                </ThemedText>
               )}
             </Pressable>
           </View>
+          {!isPremium && (
+            <ThemedText style={{ color: colors[colorScheme].error, marginTop: 8 }}>
+              AI Assistant is a premium feature.{' '}
+              <ThemedText onPress={() => router.push('/premium')} style={{ textDecorationLine: 'underline' }}>
+                Upgrade now
+              </ThemedText>
+            </ThemedText>
+          )}
           <ThemedText style={styles.aiDescription}>
             Let AI understand your progress from natural language. Example: "I drank 2 glasses of water" or "I walked 5km today"
           </ThemedText>
