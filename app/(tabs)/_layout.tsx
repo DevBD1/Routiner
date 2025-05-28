@@ -14,8 +14,8 @@ export default function TabLayout() {
   const colorScheme = useColorScheme() ?? "light";
 
   const commonHeaderStyle = {
-    backgroundColor: colors[colorScheme].background,
-    height: 60,
+    backgroundColor: colors[colorScheme].frame,
+    height: 54,
     elevation: 0,
     shadowOpacity: 0,
     borderTopWidth: 0,
@@ -23,8 +23,8 @@ export default function TabLayout() {
   };
 
   const commonTabBarStyle = {
-    backgroundColor: colors[colorScheme].background,
-    height: 60,
+    backgroundColor: colors[colorScheme].frame,
+    height: 54,
     elevation: 0,
     shadowOpacity: 0,
     borderTopWidth: 0,
@@ -43,7 +43,7 @@ export default function TabLayout() {
         headerTransparent: false,
         headerStyle: commonHeaderStyle,
         headerLeft: () => (
-          <ThemedView style={{ paddingLeft: 16 }}>
+          <ThemedView style={{ paddingLeft: 16, backgroundColor: colors[colorScheme].frame }}>
             <ThemedText type="title">Routiner</ThemedText>
           </ThemedView>
         ),

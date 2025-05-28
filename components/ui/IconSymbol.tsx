@@ -12,7 +12,7 @@ export function createTabIcon(
 ): React.FC<TabIconProps> {
   const IconComponent: React.FC<TabIconProps> = ({ color }) => (
     <View style={styles.tabBarContainer}>
-      <MaterialIcons name={iconName} size={28} color={color} />
+      <MaterialIcons name={iconName} size={32} color={color} style={{ marginTop: 16 }} />
     </View>
   );
 
