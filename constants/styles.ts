@@ -17,12 +17,12 @@ export const styles = StyleSheet.create({
     fontWeight: "600",
   },
   title: {
-    fontSize: 32,
+    fontSize: 24,
     fontWeight: "bold",
-    lineHeight: 32,
+    lineHeight: 24,
   },
   subtitle: {
-    fontSize: 20,
+    fontSize: 14,
     fontWeight: "bold",
   },
   link: {
@@ -98,7 +98,7 @@ export const styles = StyleSheet.create({
     height: width * 0.4,
     borderRadius: (width * 0.4) / 2,
     borderWidth: 8,
-    borderColor: "#fff",
+    //borderColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
   },

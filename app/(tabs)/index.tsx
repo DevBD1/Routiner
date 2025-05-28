@@ -41,19 +41,16 @@ const HomeScreen: React.FC = () => {
       style={styles.background}
     >
       <SafeAreaView style={styles.container}>
-        {/* Header */}
-        <ThemedView style={styles.headerText}>
-          <ThemedText type="title">Routiner</ThemedText>
-          <ThemedText type="subtitle">
-            Build your habits, build your future
-          </ThemedText>
-        </ThemedView>
-
         {/* Progress */}
         <View style={styles.progressContainer}>
-          <View style={styles.progressCircle}>
+          <View style={[styles.progressCircle, { backgroundColor: colors[colorScheme].frame, borderColor: colors[colorScheme].text }]}>
             <ThemedText>{progressPercent}%</ThemedText>
           </View>
+          {/*
+          <ThemedView style={[styles.progressCircle, { backgroundColor: colors[colorScheme].frame, borderColor: colors[colorScheme].text }]}>
+            <ThemedText>{progressPercent}%</ThemedText>
+          </ThemedView>
+          */}
         </View>
 
         {/* Habits List */}
