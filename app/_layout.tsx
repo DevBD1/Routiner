@@ -13,6 +13,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { AuthProvider, useAuth } from "../context/AuthContext";
 import { HabitsProvider } from "../context/HabitsContext";
+import { SettingsProvider } from "../context/SettingsContext";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -69,9 +70,11 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <AuthProvider>
-        <HabitsProvider>
-          <RootLayoutNav />
-        </HabitsProvider>
+        <SettingsProvider>
+          <HabitsProvider>
+            <RootLayoutNav />
+          </HabitsProvider>
+        </SettingsProvider>
       </AuthProvider>
     </GestureHandlerRootView>
   );
