@@ -34,7 +34,7 @@ const HomeScreen: React.FC = () => {
     >
       <SafeAreaView style={styles.container}>
         {/* Header */}
-        <View style={styles.header}>
+        <View style={styles.headerText}>
           <Text style={styles.title}>Routiner</Text>
           <Text style={styles.subtitle}>
             Build your habits, build your future
@@ -44,7 +44,7 @@ const HomeScreen: React.FC = () => {
         {/* Progress */}
         <View style={styles.progressContainer}>
           <View style={styles.progressCircle}>
-            <Text style={styles.progressText}>{progressPercent}%</Text>
+            <Text style={styles.text}>{progressPercent}%</Text>
           </View>
         </View>
 
@@ -69,7 +69,7 @@ const HomeScreen: React.FC = () => {
               <View style={{ flexDirection: "row", alignItems: "center" }}>
                 <Text
                   style={[
-                    styles.cardText,
+                    styles.text,
                     item.done && styles.correctText,
                     { fontWeight: "300", marginRight: 12 },
                   ]}
@@ -78,7 +78,7 @@ const HomeScreen: React.FC = () => {
                 </Text>
                 <Text
                   style={[
-                    styles.cardText,
+                    styles.text,
                     item.done && styles.correctText,
                     { fontWeight: "300" },
                   ]}
@@ -94,7 +94,7 @@ const HomeScreen: React.FC = () => {
         <View style={styles.footer}>
           <Link href="/habits/add" asChild>
             <Pressable style={styles.addButton}>
-              <Text style={styles.addButtonText}>+</Text>
+              <Text style={styles.text}>+</Text>
             </Pressable>
           </Link>
         </View>
