@@ -1,23 +1,73 @@
 import React from "react";
-import { SafeAreaView, ColorValue } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import { styles } from "@/constants/styles";
-import { useColorScheme } from "@/hooks/useColorScheme";
+import { View, Switch, StyleSheet } from "react-native";
 import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
+import { colors } from "@/constants/colors";
+import { useColorScheme } from "@/hooks/useColorScheme";
+import { useSettings } from "@/context/SettingsContext";
 
-const SettingsScreen: React.FC = () => {
+export default function SettingsScreen() {
   const colorScheme = useColorScheme() ?? "light";
-  const darkGradient: [ColorValue, ColorValue, ColorValue] = ["#151718", "#1a1d1e", "#24243e"];
-  const lightGradient: [ColorValue, ColorValue, ColorValue] = ["#ffffff", "#f5f5f5", "#e8e8e8"];
-  const gradientColors = colorScheme === "dark" ? darkGradient : lightGradient;
+  const { settings, updateSettings } = useSettings();
 
   return (
-    <LinearGradient colors={gradientColors} style={styles.background}>
-      <SafeAreaView style={styles.container}>
-        {/* Add settings content here */}
-      </SafeAreaView>
-    </LinearGradient>
+    <ThemedView style={styles.container}>
+      <View style={styles.section}>
+        <ThemedText style={styles.sectionTitle}>Habit Settings</ThemedText>
+        
+        <View style={styles.settingRow}>
+          <View style={styles.settingInfo}>
+            <ThemedText style={styles.settingTitle}>MAX Habits Start Full</ThemedText>
+            <ThemedText style={styles.settingDescription}>
+              Progress bar for MAX-type habits starts full and decreases as you progress
+            </ThemedText>
+          </View>
+          <Switch
+            value={settings.maxHabitStartFull}
+            onValueChange={(value) => updateSettings({ maxHabitStartFull: value })}
+            trackColor={{ 
+              false: colors[colorScheme].tabIconDefault,
+              true: colors[colorScheme].tint 
+            }}
+            thumbColor={colors[colorScheme].background}
+          />
+        </View>
+      </View>
+    </ThemedView>
   );
-};
+}
 
-export default SettingsScreen; 
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+  },
+  section: {
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 16,
+  },
+  settingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(0,0,0,0.1)",
+  },
+  settingInfo: {
+    flex: 1,
+    marginRight: 16,
+  },
+  settingTitle: {
+    fontSize: 16,
+    marginBottom: 4,
+  },
+  settingDescription: {
+    fontSize: 14,
+    opacity: 0.7,
+  },
+}); 

@@ -97,7 +97,10 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit, onToggle, onEdit, o
                     </ThemedText>
                   </View>
                   <View style={{ marginTop: 4 }}>
-                    <ProgressBar progress={progress} />
+                    <ProgressBar 
+                      progress={progress} 
+                      goalType={habit.goalType}
+                    />
                     <ThemedText style={{ fontSize: 12, color: goalColor, marginTop: 2 }}>
                       {habit.currentValue || 0} / {habit.goalValue} {habit.goalUnit}
                     </ThemedText>
