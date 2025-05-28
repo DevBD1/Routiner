@@ -3,15 +3,18 @@ import React from "react";
 import {
   SafeAreaView,
   View,
-  Text,
   Pressable,
   Dimensions,
   FlatList,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Link } from "expo-router";
-// Shared styles import
+
 import { styles } from "@/constants/styles";
+import { colors } from "@/constants/colors";
+import { useColorScheme } from "@/hooks/useColorScheme";
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
 
 const { width } = Dimensions.get("window");
 
@@ -24,27 +27,32 @@ const habits = [
 ];
 
 const HomeScreen: React.FC = () => {
+  const colorScheme = useColorScheme() ?? "light";
   const completedCount = habits.filter((h) => h.done).length;
   const progressPercent = Math.round((completedCount / habits.length) * 100);
 
   return (
     <LinearGradient
-      colors={["#0f0c29", "#302b63", "#24243e"]}
+      colors={
+        colorScheme === "light"
+          ? ["#ffffff", "#f5f5f5", "#e8e8e8"]
+          : ["#151718", "#1a1d1e", "#24243e"]
+      }
       style={styles.background}
     >
       <SafeAreaView style={styles.container}>
         {/* Header */}
-        <View style={styles.headerText}>
-          <Text style={styles.title}>Routiner</Text>
-          <Text style={styles.subtitle}>
+        <ThemedView style={styles.headerText}>
+          <ThemedText type="title">Routiner</ThemedText>
+          <ThemedText type="subtitle">
             Build your habits, build your future
-          </Text>
-        </View>
+          </ThemedText>
+        </ThemedView>
 
         {/* Progress */}
         <View style={styles.progressContainer}>
           <View style={styles.progressCircle}>
-            <Text style={styles.text}>{progressPercent}%</Text>
+            <ThemedText>{progressPercent}%</ThemedText>
           </View>
         </View>
 
@@ -54,7 +62,7 @@ const HomeScreen: React.FC = () => {
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContainer}
           renderItem={({ item }) => (
-            <View
+            <ThemedView
               style={[
                 styles.habitCard,
                 {
@@ -67,26 +75,24 @@ const HomeScreen: React.FC = () => {
               ]}
             >
               <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Text
+                <ThemedText
                   style={[
-                    styles.text,
                     item.done && styles.correctText,
                     { fontWeight: "300", marginRight: 12 },
                   ]}
                 >
                   {item.done ? "✓" : "○"}
-                </Text>
-                <Text
+                </ThemedText>
+                <ThemedText
                   style={[
-                    styles.text,
                     item.done && styles.correctText,
                     { fontWeight: "300" },
                   ]}
                 >
                   {item.title}
-                </Text>
+                </ThemedText>
               </View>
-            </View>
+            </ThemedView>
           )}
         />
 
@@ -94,7 +100,7 @@ const HomeScreen: React.FC = () => {
         <View style={styles.footer}>
           <Link href="/habits/add" asChild>
             <Pressable style={styles.addButton}>
-              <Text style={styles.text}>+</Text>
+              <ThemedText>+</ThemedText>
             </Pressable>
           </Link>
         </View>
