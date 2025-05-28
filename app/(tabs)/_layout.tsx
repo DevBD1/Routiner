@@ -15,7 +15,7 @@ export default function TabLayout() {
 
   const commonHeaderStyle = {
     backgroundColor: colors[colorScheme].frame,
-    height: 54,
+    height: 60,
     elevation: 0,
     shadowOpacity: 0,
     borderTopWidth: 0,
@@ -24,7 +24,7 @@ export default function TabLayout() {
 
   const commonTabBarStyle = {
     backgroundColor: colors[colorScheme].frame,
-    height: 54,
+    height: 60,
     elevation: 0,
     shadowOpacity: 0,
     borderTopWidth: 0,
@@ -47,7 +47,11 @@ export default function TabLayout() {
             <ThemedText type="title">Routiner</ThemedText>
           </ThemedView>
         ),
-        headerRight: () => null,
+        headerRight: () => (
+          <ThemedView style={{ paddingRight: 16, backgroundColor: colors[colorScheme].frame }}>
+            <ThemedText type="subtitle">Build your habits.</ThemedText>
+          </ThemedView>
+        ),
 
         tabBarActiveTintColor: colors[colorScheme].tint,
         tabBarInactiveTintColor: colors[colorScheme].tabIconDefault,
