@@ -11,6 +11,7 @@ import React, { useEffect } from "react";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { AuthProvider, useAuth } from "../context/AuthContext";
+import { HabitsProvider } from "../context/HabitsContext";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -66,7 +67,9 @@ function RootLayoutNav() {
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <RootLayoutNav />
+      <HabitsProvider>
+        <RootLayoutNav />
+      </HabitsProvider>
     </AuthProvider>
   );
 }
