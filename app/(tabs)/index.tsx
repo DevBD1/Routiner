@@ -20,6 +20,25 @@ import { useHabits } from "@/context/HabitsContext";
 
 const { width } = Dimensions.get("window");
 
+function getRepeatSummary(habit) {
+  if (!habit.repeatEnabled) return null;
+  if (habit.repeatType === 'none') {
+    return `One-time: ${habit.repeatDate ? new Date(habit.repeatDate).toLocaleDateString() : ''}`;
+  }
+  if (habit.repeatType === 'daily') {
+    return `Every ${habit.repeatEvery} day(s)`;
+  }
+  if (habit.repeatType === 'weekly') {
+    const days = (habit.repeatDaysOfWeek || []).map(idx => ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][idx]).join(', ');
+    return `Every ${habit.repeatEvery} week(s) on ${days}`;
+  }
+  if (habit.repeatType === 'monthly') {
+    const days = (habit.repeatDaysOfMonth || []).join(', ');
+    return `Every ${habit.repeatEvery} month(s) on ${days}`;
+  }
+  return null;
+}
+
 const HomeScreen: React.FC = () => {
   const colorScheme = useColorScheme() ?? "light";
   const { habits, toggleHabit, deleteHabit } = useHabits();
@@ -83,26 +102,33 @@ const HomeScreen: React.FC = () => {
               ]}
             >
               <Pressable onPress={() => toggleHabit(item.id)} style={{ flex: 1 }}>
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
-                  <ThemedText
-                    style={[
-                      item.done && styles.correctText,
-                      { fontWeight: "300", marginRight: 12 },
-                    ]}
-                  >
-                    {item.done ? "✓" : "○"}
-                  </ThemedText>
-                  <ThemedText
-                    style={[
-                      item.done && styles.correctText,
-                      { fontWeight: "300" },
-                    ]}
-                  >
-                    {item.title}
-                  </ThemedText>
-                  {item.goalEnabled && item.goalValue && item.goalUnit && item.goalType && (
-                    <ThemedText style={{ marginLeft: 8, fontSize: 13, color: colors[colorScheme].tabIconDefault }}>
-                      {item.goalType.toUpperCase()} {item.goalValue} {item.goalUnit}
+                <View style={{ flexDirection: "column" }}>
+                  <View style={{ flexDirection: "row", alignItems: "center" }}>
+                    <ThemedText
+                      style={[
+                        item.done && styles.correctText,
+                        { fontWeight: "300", marginRight: 12 },
+                      ]}
+                    >
+                      {item.done ? "✓" : "○"}
+                    </ThemedText>
+                    <ThemedText
+                      style={[
+                        item.done && styles.correctText,
+                        { fontWeight: "300" },
+                      ]}
+                    >
+                      {item.title}
+                    </ThemedText>
+                    {item.goalEnabled && item.goalValue && item.goalUnit && item.goalType && (
+                      <ThemedText style={{ marginLeft: 8, fontSize: 13, color: colors[colorScheme].tabIconDefault }}>
+                        {item.goalType.toUpperCase()} {item.goalValue} {item.goalUnit}
+                      </ThemedText>
+                    )}
+                  </View>
+                  {getRepeatSummary(item) && (
+                    <ThemedText style={{ fontSize: 12, color: colors[colorScheme].tabIconDefault, marginTop: 2 }}>
+                      {getRepeatSummary(item)}
                     </ThemedText>
                   )}
                 </View>

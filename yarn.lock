@@ -2858,6 +2858,13 @@
     prompts "^2.4.2"
     semver "^7.5.2"
 
+"@react-native-community/datetimepicker@^8.4.1":
+  version "8.4.1"
+  resolved "https://registry.npmjs.org/@react-native-community/datetimepicker/-/datetimepicker-8.4.1.tgz"
+  integrity sha512-DrK+CUS5fZnz8dhzBezirkzQTcNDdaXer3oDLh0z4nc2tbdIdnzwvXCvi8IEOIvleoc9L95xS5tKUl0/Xv71Mg==
+  dependencies:
+    invariant "^2.2.4"
+
 "@react-native-firebase/app@^21.13.0", "@react-native-firebase/app@21.14.0":
   version "21.14.0"
   resolved "https://registry.npmjs.org/@react-native-firebase/app/-/app-21.14.0.tgz"
@@ -5949,7 +5956,7 @@ expo-web-browser@~14.1.6:
   resolved "https://registry.npmjs.org/expo-web-browser/-/expo-web-browser-14.1.6.tgz"
   integrity sha512-/4P8eWqRyfXIMZna3acg320LXNA+P2cwyEVbjDX8vHnWU+UnOtyRKWy3XaAIyMPQ9hVjBNUQTh4MPvtnPRzakw==
 
-expo@*, expo@^52.0.42, expo@>=47.0.0, expo@>=50.0.0:
+expo@*, expo@^52.0.42, expo@>=47.0.0, expo@>=50.0.0, expo@>=52.0.0:
   version "52.0.46"
   resolved "https://registry.npmjs.org/expo/-/expo-52.0.46.tgz"
   integrity sha512-JG89IVZLp7DWzgeiQb+0N43kWOF1DUm3esBvAS9cPFWZsM9x8nDXgbvtREcycDPA6E+yJsSC+086CigeUY6sVA==
