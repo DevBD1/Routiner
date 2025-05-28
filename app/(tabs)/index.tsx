@@ -100,6 +100,11 @@ const HomeScreen: React.FC = () => {
                   >
                     {item.title}
                   </ThemedText>
+                  {item.goalEnabled && item.goalValue && item.goalUnit && item.goalType && (
+                    <ThemedText style={{ marginLeft: 8, fontSize: 13, color: colors[colorScheme].tabIconDefault }}>
+                      {item.goalType.toUpperCase()} {item.goalValue} {item.goalUnit}
+                    </ThemedText>
+                  )}
                 </View>
               </Pressable>
               <View style={{ flexDirection: "row", alignItems: "center" }}>

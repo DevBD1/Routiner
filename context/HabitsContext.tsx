@@ -6,14 +6,28 @@ export interface Habit {
   title: string;
   done: boolean;
   createdAt: number;
+  goalEnabled: boolean;
+  goalValue: number | null;
+  goalUnit: string | null;
+  goalType: 'min' | 'max' | 'precise' | null;
 }
 
 interface HabitsContextType {
   habits: Habit[];
-  addHabit: (title: string) => Promise<void>;
+  addHabit: (title: string, goal?: {
+    goalEnabled: boolean;
+    goalValue: number | null;
+    goalUnit: string | null;
+    goalType: 'min' | 'max' | 'precise' | null;
+  }) => Promise<void>;
   toggleHabit: (id: string) => Promise<void>;
   deleteHabit: (id: string) => Promise<void>;
-  editHabit: (id: string, newTitle: string) => Promise<void>;
+  editHabit: (id: string, newTitle: string, goal?: {
+    goalEnabled: boolean;
+    goalValue: number | null;
+    goalUnit: string | null;
+    goalType: 'min' | 'max' | 'precise' | null;
+  }) => Promise<void>;
 }
 
 const HabitsContext = createContext<HabitsContextType | undefined>(undefined);
@@ -45,14 +59,22 @@ export function HabitsProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const addHabit = async (title: string) => {
+  const addHabit = async (title: string, goal?: {
+    goalEnabled: boolean;
+    goalValue: number | null;
+    goalUnit: string | null;
+    goalType: 'min' | 'max' | 'precise' | null;
+  }) => {
     const newHabit: Habit = {
-      id: Date.now().toString(), // Simple ID generation
+      id: Date.now().toString(),
       title,
       done: false,
       createdAt: Date.now(),
+      goalEnabled: goal?.goalEnabled ?? false,
+      goalValue: goal?.goalValue ?? null,
+      goalUnit: goal?.goalUnit ?? null,
+      goalType: goal?.goalType ?? null,
     };
-
     const updatedHabits = [...habits, newHabit];
     setHabits(updatedHabits);
     await saveHabits(updatedHabits);
@@ -72,9 +94,23 @@ export function HabitsProvider({ children }: { children: React.ReactNode }) {
     await saveHabits(updatedHabits);
   };
 
-  const editHabit = async (id: string, newTitle: string) => {
+  const editHabit = async (id: string, newTitle: string, goal?: {
+    goalEnabled: boolean;
+    goalValue: number | null;
+    goalUnit: string | null;
+    goalType: 'min' | 'max' | 'precise' | null;
+  }) => {
     const updatedHabits = habits.map(habit =>
-      habit.id === id ? { ...habit, title: newTitle } : habit
+      habit.id === id
+        ? {
+            ...habit,
+            title: newTitle,
+            goalEnabled: goal?.goalEnabled ?? habit.goalEnabled,
+            goalValue: goal?.goalValue ?? habit.goalValue,
+            goalUnit: goal?.goalUnit ?? habit.goalUnit,
+            goalType: goal?.goalType ?? habit.goalType,
+          }
+        : habit
     );
     setHabits(updatedHabits);
     await saveHabits(updatedHabits);
