@@ -74,6 +74,10 @@ export default function TabLayout() {
         name="index"
         options={{ tabBarIcon: createTabIcon("home") }}
       />
+      <Tabs.Screen
+        name="settings"
+        options={{ tabBarIcon: createTabIcon("settings") }}
+      />
     </Tabs>
   );
 }
