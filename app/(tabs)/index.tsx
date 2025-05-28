@@ -9,7 +9,7 @@ import {
   ColorValue,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
 
 import { styles } from "@/constants/styles";
 import { colors } from "@/constants/colors";
@@ -22,7 +22,8 @@ const { width } = Dimensions.get("window");
 
 const HomeScreen: React.FC = () => {
   const colorScheme = useColorScheme() ?? "light";
-  const { habits, toggleHabit } = useHabits();
+  const { habits, toggleHabit, deleteHabit } = useHabits();
+  const router = useRouter();
   const completedCount = habits.filter((h) => h.done).length;
   const progressPercent = habits.length > 0 
     ? Math.round((completedCount / habits.length) * 100)
@@ -66,19 +67,22 @@ const HomeScreen: React.FC = () => {
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContainer}
           renderItem={({ item }) => (
-            <Pressable onPress={() => toggleHabit(item.id)}>
-              <ThemedView
-                style={[
-                  styles.habitCard,
-                  {
-                    backgroundColor: "transparent",
-                    borderBottomWidth: 1,
-                    borderBottomColor: "rgba(255,255,255,0.2)",
-                    paddingVertical: 8,
-                    paddingHorizontal: 0,
-                  },
-                ]}
-              >
+            <ThemedView
+              style={[
+                styles.habitCard,
+                {
+                  backgroundColor: "transparent",
+                  borderBottomWidth: 1,
+                  borderBottomColor: "rgba(255,255,255,0.2)",
+                  paddingVertical: 8,
+                  paddingHorizontal: 0,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                },
+              ]}
+            >
+              <Pressable onPress={() => toggleHabit(item.id)} style={{ flex: 1 }}>
                 <View style={{ flexDirection: "row", alignItems: "center" }}>
                   <ThemedText
                     style={[
@@ -97,8 +101,28 @@ const HomeScreen: React.FC = () => {
                     {item.title}
                   </ThemedText>
                 </View>
-              </ThemedView>
-            </Pressable>
+              </Pressable>
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <Pressable
+                  onPress={() => router.push(`/habits/edit/${item.id}`)}
+                  style={{ padding: 8, marginLeft: 4 }}
+                  accessibilityLabel="Edit habit"
+                >
+                  <ThemedText style={{ color: colors[colorScheme].tint, fontSize: 18 }}>
+                    ✏️
+                  </ThemedText>
+                </Pressable>
+                <Pressable
+                  onPress={() => deleteHabit(item.id)}
+                  style={{ padding: 8, marginLeft: 4 }}
+                  accessibilityLabel="Delete habit"
+                >
+                  <ThemedText style={{ color: colors[colorScheme].error, fontSize: 18 }}>
+                    🗑️
+                  </ThemedText>
+                </Pressable>
+              </View>
+            </ThemedView>
           )}
         />
 
