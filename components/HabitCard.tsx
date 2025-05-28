@@ -38,12 +38,18 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit, onToggle, onEdit, o
   const goalColor = habit.goalEnabled ? colors[colorScheme].tint : colors[colorScheme].tabIconDefault;
   const repeatColor = habit.repeatEnabled ? colors[colorScheme].tint : colors[colorScheme].tabIconDefault;
 
+  // Icon names for MaterialIcons
+  const doneIcon: "check-circle" | "radio-button-unchecked" = habit.done ? "check-circle" : "radio-button-unchecked";
+  let goalIcon: "arrow-upward" | "arrow-downward" | "adjust" = "adjust";
+  if (habit.goalType === "min") goalIcon = "arrow-upward";
+  else if (habit.goalType === "max") goalIcon = "arrow-downward";
+
   return (
     <ThemedView style={[styles.card, { backgroundColor: colors[colorScheme].frame, shadowColor: colors[colorScheme].text }]}> 
       <Pressable onPress={onToggle} style={{ flex: 1 }}>
         <View style={{ flexDirection: "row", alignItems: "center" }}>
           {/* Completion Icon */}
-          <View style={{ marginRight: 12 }}>{createTabIcon(habit.done ? "checkmark-circle" : "ellipse-outline")({ color: iconColor, size: 24 })}</View>
+          <View style={{ marginRight: 12 }}>{createTabIcon(doneIcon)({ color: iconColor })}</View>
           <View style={{ flex: 1 }}>
             <ThemedText style={[{ fontWeight: "bold", fontSize: 16 }, habit.done && { color: colors[colorScheme].correct }]}>
               {habit.title}
@@ -51,13 +57,7 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit, onToggle, onEdit, o
             {/* Goal Info */}
             {habit.goalEnabled && habit.goalValue && habit.goalUnit && habit.goalType && (
               <View style={{ flexDirection: "row", alignItems: "center", marginTop: 2 }}>
-                {createTabIcon(
-                  habit.goalType === "min"
-                    ? "arrow-up-circle"
-                    : habit.goalType === "max"
-                    ? "arrow-down-circle"
-                    : "ellipse-outline"
-                )({ color: goalColor, size: 16, style: { marginRight: 4 } })}
+                {createTabIcon(goalIcon)({ color: goalColor })}
                 <ThemedText style={{ fontSize: 13, color: goalColor }}>
                   {habit.goalType.toUpperCase()} {habit.goalValue} {habit.goalUnit}
                 </ThemedText>
@@ -66,7 +66,7 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit, onToggle, onEdit, o
             {/* Repeat Info */}
             {getRepeatSummary(habit) && (
               <View style={{ flexDirection: "row", alignItems: "center", marginTop: 2 }}>
-                {createTabIcon("repeat")({ color: repeatColor, size: 16, style: { marginRight: 4 } })}
+                {createTabIcon("repeat")({ color: repeatColor })}
                 <ThemedText style={{ fontSize: 12, color: repeatColor }}>{getRepeatSummary(habit)}</ThemedText>
               </View>
             )}
@@ -76,10 +76,10 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit, onToggle, onEdit, o
       {/* Actions */}
       <View style={{ flexDirection: "row", alignItems: "center", marginLeft: 8 }}>
         <Pressable onPress={onEdit} style={{ padding: 8 }} accessibilityLabel="Edit habit">
-          {createTabIcon("create")({ color: colors[colorScheme].tint, size: 20 })}
+          {createTabIcon("create")({ color: colors[colorScheme].tint })}
         </Pressable>
         <Pressable onPress={onDelete} style={{ padding: 8 }} accessibilityLabel="Delete habit">
-          {createTabIcon("trash")({ color: colors[colorScheme].error, size: 20 })}
+          {createTabIcon("delete")({ color: colors[colorScheme].error })}
         </Pressable>
       </View>
     </ThemedView>
