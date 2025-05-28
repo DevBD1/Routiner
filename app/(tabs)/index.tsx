@@ -17,6 +17,7 @@ import { useColorScheme } from "@/hooks/useColorScheme";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { useHabits } from "@/context/HabitsContext";
+import { HabitCard } from "@/components/HabitCard";
 
 const { width } = Dimensions.get("window");
 
@@ -86,74 +87,12 @@ const HomeScreen: React.FC = () => {
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContainer}
           renderItem={({ item }) => (
-            <ThemedView
-              style={[
-                styles.habitCard,
-                {
-                  backgroundColor: "transparent",
-                  borderBottomWidth: 1,
-                  borderBottomColor: "rgba(255,255,255,0.2)",
-                  paddingVertical: 8,
-                  paddingHorizontal: 0,
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                },
-              ]}
-            >
-              <Pressable onPress={() => toggleHabit(item.id)} style={{ flex: 1 }}>
-                <View style={{ flexDirection: "column" }}>
-                  <View style={{ flexDirection: "row", alignItems: "center" }}>
-                    <ThemedText
-                      style={[
-                        item.done && styles.correctText,
-                        { fontWeight: "300", marginRight: 12 },
-                      ]}
-                    >
-                      {item.done ? "✓" : "○"}
-                    </ThemedText>
-                    <ThemedText
-                      style={[
-                        item.done && styles.correctText,
-                        { fontWeight: "300" },
-                      ]}
-                    >
-                      {item.title}
-                    </ThemedText>
-                    {item.goalEnabled && item.goalValue && item.goalUnit && item.goalType && (
-                      <ThemedText style={{ marginLeft: 8, fontSize: 13, color: colors[colorScheme].tabIconDefault }}>
-                        {item.goalType.toUpperCase()} {item.goalValue} {item.goalUnit}
-                      </ThemedText>
-                    )}
-                  </View>
-                  {getRepeatSummary(item) && (
-                    <ThemedText style={{ fontSize: 12, color: colors[colorScheme].tabIconDefault, marginTop: 2 }}>
-                      {getRepeatSummary(item)}
-                    </ThemedText>
-                  )}
-                </View>
-              </Pressable>
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Pressable
-                  onPress={() => router.push(`/habits/edit/${item.id}`)}
-                  style={{ padding: 8, marginLeft: 4 }}
-                  accessibilityLabel="Edit habit"
-                >
-                  <ThemedText style={{ color: colors[colorScheme].tint, fontSize: 18 }}>
-                    ✏️
-                  </ThemedText>
-                </Pressable>
-                <Pressable
-                  onPress={() => deleteHabit(item.id)}
-                  style={{ padding: 8, marginLeft: 4 }}
-                  accessibilityLabel="Delete habit"
-                >
-                  <ThemedText style={{ color: colors[colorScheme].error, fontSize: 18 }}>
-                    🗑️
-                  </ThemedText>
-                </Pressable>
-              </View>
-            </ThemedView>
+            <HabitCard
+              habit={item}
+              onToggle={() => toggleHabit(item.id)}
+              onEdit={() => router.push(`/habits/edit/${item.id}`)}
+              onDelete={() => deleteHabit(item.id)}
+            />
           )}
         />
 
