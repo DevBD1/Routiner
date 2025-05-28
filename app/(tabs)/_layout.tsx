@@ -3,40 +3,35 @@ import { Platform } from "react-native";
 import { Tabs } from "expo-router";
 
 import { createTabIcon } from "@/components/ui/IconSymbol";
-
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
 import { HapticTab } from "@/components/HapticTab";
 import TabBarBackground from "@/components/ui/TabBarBackground";
 import { colors } from "@/constants/colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 
-const tabBarColors = {
-  active: "#7289da",
-  inactive: "#8C8C8C",
-  background: "#1e2124",
-};
-
-const commonHeaderStyle = {
-  backgroundColor: tabBarColors.background,
-  height: 60,
-  elevation: 0,
-  shadowOpacity: 0,
-  borderTopWidth: 0,
-  borderWidth: 0,
-};
-
-const commonTabBarStyle = {
-  backgroundColor: tabBarColors.background,
-  height: 60,
-  elevation: 0,
-  shadowOpacity: 0,
-  borderTopWidth: 0,
-  borderWidth: 0,
-  paddingTop: 0,
-  paddingBottom: 0,
-};
-
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme() ?? "light";
+
+  const commonHeaderStyle = {
+    backgroundColor: colors[colorScheme].background,
+    height: 60,
+    elevation: 0,
+    shadowOpacity: 0,
+    borderTopWidth: 0,
+    borderWidth: 0,
+  };
+
+  const commonTabBarStyle = {
+    backgroundColor: colors[colorScheme].background,
+    height: 60,
+    elevation: 0,
+    shadowOpacity: 0,
+    borderTopWidth: 0,
+    borderWidth: 0,
+    paddingTop: 0,
+    paddingBottom: 0,
+  };
 
   return (
     <Tabs
@@ -44,14 +39,18 @@ export default function TabLayout() {
         headerShown: true,
         headerTitle: "",
         headerTitleAlign: "center",
-        headerTintColor: tabBarColors.inactive,
+        headerTintColor: colors[colorScheme].text,
         headerTransparent: false,
         headerStyle: commonHeaderStyle,
-        headerLeft: () => "Routiner",
+        headerLeft: () => (
+          <ThemedView style={{ paddingLeft: 16 }}>
+            <ThemedText type="title">Routiner</ThemedText>
+          </ThemedView>
+        ),
         headerRight: () => null,
 
-        tabBarActiveTintColor: colors[colorScheme ?? "light"].tint,
-        tabBarInactiveTintColor: tabBarColors.inactive,
+        tabBarActiveTintColor: colors[colorScheme].tint,
+        tabBarInactiveTintColor: colors[colorScheme].tabIconDefault,
         tabBarShowLabel: false,
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
