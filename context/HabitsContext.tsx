@@ -10,6 +10,12 @@ export interface Habit {
   goalValue: number | null;
   goalUnit: string | null;
   goalType: 'min' | 'max' | 'precise' | null;
+  repeatEnabled: boolean;
+  repeatType: 'none' | 'daily' | 'weekly' | 'monthly';
+  repeatEvery: number | null;
+  repeatDaysOfWeek: number[] | null;
+  repeatDaysOfMonth: number[] | null;
+  repeatDate: string | null;
 }
 
 interface HabitsContextType {
@@ -19,6 +25,13 @@ interface HabitsContextType {
     goalValue: number | null;
     goalUnit: string | null;
     goalType: 'min' | 'max' | 'precise' | null;
+  }, repeat?: {
+    repeatEnabled: boolean;
+    repeatType: 'none' | 'daily' | 'weekly' | 'monthly';
+    repeatEvery: number | null;
+    repeatDaysOfWeek: number[] | null;
+    repeatDaysOfMonth: number[] | null;
+    repeatDate: string | null;
   }) => Promise<void>;
   toggleHabit: (id: string) => Promise<void>;
   deleteHabit: (id: string) => Promise<void>;
@@ -27,6 +40,13 @@ interface HabitsContextType {
     goalValue: number | null;
     goalUnit: string | null;
     goalType: 'min' | 'max' | 'precise' | null;
+  }, repeat?: {
+    repeatEnabled: boolean;
+    repeatType: 'none' | 'daily' | 'weekly' | 'monthly';
+    repeatEvery: number | null;
+    repeatDaysOfWeek: number[] | null;
+    repeatDaysOfMonth: number[] | null;
+    repeatDate: string | null;
   }) => Promise<void>;
 }
 
@@ -64,6 +84,13 @@ export function HabitsProvider({ children }: { children: React.ReactNode }) {
     goalValue: number | null;
     goalUnit: string | null;
     goalType: 'min' | 'max' | 'precise' | null;
+  }, repeat?: {
+    repeatEnabled: boolean;
+    repeatType: 'none' | 'daily' | 'weekly' | 'monthly';
+    repeatEvery: number | null;
+    repeatDaysOfWeek: number[] | null;
+    repeatDaysOfMonth: number[] | null;
+    repeatDate: string | null;
   }) => {
     const newHabit: Habit = {
       id: Date.now().toString(),
@@ -74,6 +101,12 @@ export function HabitsProvider({ children }: { children: React.ReactNode }) {
       goalValue: goal?.goalValue ?? null,
       goalUnit: goal?.goalUnit ?? null,
       goalType: goal?.goalType ?? null,
+      repeatEnabled: repeat?.repeatEnabled ?? false,
+      repeatType: repeat?.repeatType ?? 'none',
+      repeatEvery: repeat?.repeatEvery ?? null,
+      repeatDaysOfWeek: repeat?.repeatDaysOfWeek ?? null,
+      repeatDaysOfMonth: repeat?.repeatDaysOfMonth ?? null,
+      repeatDate: repeat?.repeatDate ?? null,
     };
     const updatedHabits = [...habits, newHabit];
     setHabits(updatedHabits);
@@ -99,6 +132,13 @@ export function HabitsProvider({ children }: { children: React.ReactNode }) {
     goalValue: number | null;
     goalUnit: string | null;
     goalType: 'min' | 'max' | 'precise' | null;
+  }, repeat?: {
+    repeatEnabled: boolean;
+    repeatType: 'none' | 'daily' | 'weekly' | 'monthly';
+    repeatEvery: number | null;
+    repeatDaysOfWeek: number[] | null;
+    repeatDaysOfMonth: number[] | null;
+    repeatDate: string | null;
   }) => {
     const updatedHabits = habits.map(habit =>
       habit.id === id
@@ -109,6 +149,12 @@ export function HabitsProvider({ children }: { children: React.ReactNode }) {
             goalValue: goal?.goalValue ?? habit.goalValue,
             goalUnit: goal?.goalUnit ?? habit.goalUnit,
             goalType: goal?.goalType ?? habit.goalType,
+            repeatEnabled: repeat?.repeatEnabled ?? habit.repeatEnabled,
+            repeatType: repeat?.repeatType ?? habit.repeatType,
+            repeatEvery: repeat?.repeatEvery ?? habit.repeatEvery,
+            repeatDaysOfWeek: repeat?.repeatDaysOfWeek ?? habit.repeatDaysOfWeek,
+            repeatDaysOfMonth: repeat?.repeatDaysOfMonth ?? habit.repeatDaysOfMonth,
+            repeatDate: repeat?.repeatDate ?? habit.repeatDate,
           }
         : habit
     );

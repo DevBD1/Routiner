@@ -8,8 +8,10 @@ import {
   KeyboardAvoidingView,
   Platform,
   Switch,
+  ScrollView,
 } from "react-native";
 import { Picker } from '@react-native-picker/picker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { useLocalSearchParams, router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -28,6 +30,9 @@ const GOAL_TYPES = [
   { label: "Maximum", value: "max" },
   { label: "Precise", value: "precise" },
 ];
+const REPEAT_TYPES = ["none", "daily", "weekly", "monthly"];
+const WEEKDAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+const MONTH_DAYS = Array.from({ length: 31 }, (_, i) => i + 1);
 
 const EditHabitScreen: React.FC = () => {
   const colorScheme = useColorScheme() ?? "light";
@@ -41,6 +46,15 @@ const EditHabitScreen: React.FC = () => {
   const [goalType, setGoalType] = useState<'min' | 'max' | 'precise'>(habit?.goalType ?? "min");
   const [error, setError] = useState<string>("");
 
+  // Repeat state
+  const [repeatEnabled, setRepeatEnabled] = useState(habit?.repeatEnabled ?? false);
+  const [repeatType, setRepeatType] = useState<'none' | 'daily' | 'weekly' | 'monthly'>(habit?.repeatType ?? 'none');
+  const [repeatEvery, setRepeatEvery] = useState<number>(habit?.repeatEvery ?? 1);
+  const [repeatDaysOfWeek, setRepeatDaysOfWeek] = useState<number[]>(habit?.repeatDaysOfWeek ?? [new Date().getDay()]);
+  const [repeatDaysOfMonth, setRepeatDaysOfMonth] = useState<number[]>(habit?.repeatDaysOfMonth ?? [new Date().getDate()]);
+  const [repeatDate, setRepeatDate] = useState<Date>(habit?.repeatDate ? new Date(habit.repeatDate) : new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
+
   useEffect(() => {
     if (habit) {
       setHabitName(habit.title);
@@ -48,6 +62,12 @@ const EditHabitScreen: React.FC = () => {
       setGoalValue(habit.goalValue !== null && habit.goalValue !== undefined ? String(habit.goalValue) : "");
       setGoalUnit(habit.goalUnit ?? UNITS[0]);
       setGoalType(habit.goalType ?? "min");
+      setRepeatEnabled(habit.repeatEnabled ?? false);
+      setRepeatType(habit.repeatType ?? 'none');
+      setRepeatEvery(habit.repeatEvery ?? 1);
+      setRepeatDaysOfWeek(habit.repeatDaysOfWeek ?? [new Date().getDay()]);
+      setRepeatDaysOfMonth(habit.repeatDaysOfMonth ?? [new Date().getDate()]);
+      setRepeatDate(habit.repeatDate ? new Date(habit.repeatDate) : new Date());
     }
   }, [habit]);
 
@@ -61,6 +81,17 @@ const EditHabitScreen: React.FC = () => {
     "#f5f5f5",
     "#e8e8e8",
   ];
+
+  const handleToggleWeekday = (dayIdx: number) => {
+    setRepeatDaysOfWeek((prev) =>
+      prev.includes(dayIdx) ? prev.filter((d) => d !== dayIdx) : [...prev, dayIdx]
+    );
+  };
+  const handleToggleMonthDay = (day: number) => {
+    setRepeatDaysOfMonth((prev) =>
+      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
+    );
+  };
 
   const handleEditHabit = async () => {
     setError("");
@@ -81,18 +112,55 @@ const EditHabitScreen: React.FC = () => {
         return;
       }
     }
+    if (repeatEnabled) {
+      if (repeatType !== 'none' && (!repeatEvery || repeatEvery < 1)) {
+        setError("Please select a valid repeat interval.");
+        return;
+      }
+      if (repeatType === 'weekly' && (!repeatDaysOfWeek.length)) {
+        setError("Please select at least one weekday.");
+        return;
+      }
+      if (repeatType === 'monthly' && (!repeatDaysOfMonth.length)) {
+        setError("Please select at least one day of the month.");
+        return;
+      }
+    }
     try {
-      await editHabit(habit.id, habitName.trim(), goalEnabled ? {
-        goalEnabled,
-        goalValue: goalValue ? parseInt(goalValue, 10) : null,
-        goalUnit,
-        goalType,
-      } : {
-        goalEnabled: false,
-        goalValue: null,
-        goalUnit: null,
-        goalType: null,
-      });
+      await editHabit(
+        habit.id,
+        habitName.trim(),
+        goalEnabled
+          ? {
+              goalEnabled,
+              goalValue: goalValue ? parseInt(goalValue, 10) : null,
+              goalUnit,
+              goalType,
+            }
+          : {
+              goalEnabled: false,
+              goalValue: null,
+              goalUnit: null,
+              goalType: null,
+            },
+        repeatEnabled
+          ? {
+              repeatEnabled: true,
+              repeatType,
+              repeatEvery: repeatType === 'none' ? null : repeatEvery,
+              repeatDaysOfWeek: repeatType === 'weekly' ? repeatDaysOfWeek : null,
+              repeatDaysOfMonth: repeatType === 'monthly' ? repeatDaysOfMonth : null,
+              repeatDate: repeatType === 'none' ? repeatDate.toISOString().slice(0, 10) : null,
+            }
+          : {
+              repeatEnabled: false,
+              repeatType: 'none',
+              repeatEvery: null,
+              repeatDaysOfWeek: null,
+              repeatDaysOfMonth: null,
+              repeatDate: repeatDate.toISOString().slice(0, 10),
+            }
+      );
       router.back();
     } catch (error) {
       setError('Error editing habit.');
@@ -118,138 +186,274 @@ const EditHabitScreen: React.FC = () => {
         style={{ flex: 1 }}
       >
         <SafeAreaView style={styles.container}>
-          <ThemedText type="title" style={{ marginBottom: 24 }}>
-            Edit Habit
-          </ThemedText>
+          <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
+            <ThemedText type="title" style={{ marginBottom: 24 }}>
+              Edit Habit
+            </ThemedText>
 
-          <ThemedView
-            style={{
-              backgroundColor: colors[colorScheme].frame,
-              borderRadius: 12,
-              padding: 16,
-              marginBottom: 24,
-            }}
-          >
-            <TextInput
-              placeholder="Enter habit name"
-              placeholderTextColor={colors[colorScheme].tabIconDefault}
-              value={habitName}
-              onChangeText={setHabitName}
+            <ThemedView
               style={{
-                fontSize: 16,
-                color: colors[colorScheme].text,
-                padding: 8,
-                borderBottomWidth: 1,
-                borderBottomColor: colors[colorScheme].tabIconDefault,
+                backgroundColor: colors[colorScheme].frame,
+                borderRadius: 12,
+                padding: 16,
+                marginBottom: 24,
               }}
-              autoFocus
-              returnKeyType="done"
-              onSubmitEditing={handleEditHabit}
-            />
-            <View style={{ flexDirection: "row", alignItems: "center", marginTop: 16 }}>
-              <ThemedText style={{ marginRight: 8 }}>Set goal</ThemedText>
-              <Switch
-                value={goalEnabled}
-                onValueChange={setGoalEnabled}
-                thumbColor={goalEnabled ? colors[colorScheme].tint : colors[colorScheme].tabIconDefault}
-                trackColor={{ true: colors[colorScheme].tint, false: colors[colorScheme].tabIconDefault }}
+            >
+              <TextInput
+                placeholder="Enter habit name"
+                placeholderTextColor={colors[colorScheme].tabIconDefault}
+                value={habitName}
+                onChangeText={setHabitName}
+                style={{
+                  fontSize: 16,
+                  color: colors[colorScheme].text,
+                  padding: 8,
+                  borderBottomWidth: 1,
+                  borderBottomColor: colors[colorScheme].tabIconDefault,
+                }}
+                autoFocus
+                returnKeyType="done"
+                onSubmitEditing={handleEditHabit}
               />
-            </View>
-            {goalEnabled && (
-              <View style={{ marginTop: 16 }}>
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
-                  <TextInput
-                    placeholder="Value"
-                    placeholderTextColor={colors[colorScheme].tabIconDefault}
-                    value={goalValue}
-                    onChangeText={setGoalValue}
-                    keyboardType="numeric"
-                    style={{
-                      fontSize: 16,
-                      color: colors[colorScheme].text,
-                      borderBottomWidth: 1,
-                      borderBottomColor: colors[colorScheme].tabIconDefault,
-                      width: 60,
-                      marginRight: 8,
-                    }}
-                  />
-                  {/* Unit Picker */}
-                  <View style={{ flex: 1, marginLeft: 8 }}>
-                    <Picker
-                      selectedValue={goalUnit}
-                      onValueChange={setGoalUnit}
-                      style={{ color: colors[colorScheme].text, backgroundColor: 'transparent' }}
-                      dropdownIconColor={colors[colorScheme].text}
-                    >
-                      {UNITS.map((unit) => (
-                        <Picker.Item key={unit} label={unit} value={unit} />
-                      ))}
-                    </Picker>
+              <View style={{ flexDirection: "row", alignItems: "center", marginTop: 16 }}>
+                <ThemedText style={{ marginRight: 8 }}>Set goal</ThemedText>
+                <Switch
+                  value={goalEnabled}
+                  onValueChange={setGoalEnabled}
+                  thumbColor={goalEnabled ? colors[colorScheme].tint : colors[colorScheme].tabIconDefault}
+                  trackColor={{ true: colors[colorScheme].tint, false: colors[colorScheme].tabIconDefault }}
+                />
+              </View>
+              {goalEnabled && (
+                <View style={{ marginTop: 16 }}>
+                  <View style={{ flexDirection: "row", alignItems: "center" }}>
+                    <TextInput
+                      placeholder="Value"
+                      placeholderTextColor={colors[colorScheme].tabIconDefault}
+                      value={goalValue}
+                      onChangeText={setGoalValue}
+                      keyboardType="numeric"
+                      style={{
+                        fontSize: 16,
+                        color: colors[colorScheme].text,
+                        borderBottomWidth: 1,
+                        borderBottomColor: colors[colorScheme].tabIconDefault,
+                        width: 60,
+                        marginRight: 8,
+                      }}
+                    />
+                    {/* Unit Picker */}
+                    <View style={{ flex: 1, marginLeft: 8 }}>
+                      <Picker
+                        selectedValue={goalUnit}
+                        onValueChange={setGoalUnit}
+                        style={{ color: colors[colorScheme].text, backgroundColor: 'transparent' }}
+                        dropdownIconColor={colors[colorScheme].text}
+                      >
+                        {UNITS.map((unit) => (
+                          <Picker.Item key={unit} label={unit} value={unit} />
+                        ))}
+                      </Picker>
+                    </View>
+                  </View>
+                  {/* Goal Type Picker */}
+                  <View style={{ flexDirection: "row", marginTop: 12 }}>
+                    {GOAL_TYPES.map((type) => (
+                      <Pressable
+                        key={type.value}
+                        onPress={() => setGoalType(type.value as 'min' | 'max' | 'precise')}
+                        style={{
+                          paddingVertical: 6,
+                          paddingHorizontal: 12,
+                          borderRadius: 8,
+                          backgroundColor: goalType === type.value ? colors[colorScheme].tint : 'transparent',
+                          marginRight: 8,
+                          borderWidth: 1,
+                          borderColor: colors[colorScheme].tabIconDefault,
+                        }}
+                      >
+                        <ThemedText style={{ color: goalType === type.value ? colors[colorScheme].background : colors[colorScheme].text }}>
+                          {type.label}
+                        </ThemedText>
+                      </Pressable>
+                    ))}
                   </View>
                 </View>
-                {/* Goal Type Picker */}
-                <View style={{ flexDirection: "row", marginTop: 12 }}>
-                  {GOAL_TYPES.map((type) => (
+              )}
+              {/* Repeat Section */}
+              <View style={{ marginTop: 24 }}>
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <ThemedText style={{ marginRight: 8 }}>Repeat</ThemedText>
+                  <Switch
+                    value={repeatEnabled}
+                    onValueChange={val => {
+                      setRepeatEnabled(val);
+                      setRepeatType(val ? 'daily' : 'none');
+                    }}
+                    thumbColor={repeatEnabled ? colors[colorScheme].tint : colors[colorScheme].tabIconDefault}
+                    trackColor={{ true: colors[colorScheme].tint, false: colors[colorScheme].tabIconDefault }}
+                  />
+                </View>
+                {repeatEnabled ? (
+                  <View style={{ marginTop: 16 }}>
+                    <View style={{ flexDirection: 'row', marginBottom: 12 }}>
+                      {REPEAT_TYPES.filter(t => t !== 'none').map(type => (
+                        <Pressable
+                          key={type}
+                          onPress={() => setRepeatType(type as 'daily' | 'weekly' | 'monthly')}
+                          style={{
+                            paddingVertical: 6,
+                            paddingHorizontal: 16,
+                            borderRadius: 8,
+                            backgroundColor: repeatType === type ? colors[colorScheme].tint : 'transparent',
+                            marginRight: 8,
+                            borderWidth: 1,
+                            borderColor: colors[colorScheme].tabIconDefault,
+                          }}
+                        >
+                          <ThemedText style={{ color: repeatType === type ? colors[colorScheme].background : colors[colorScheme].text }}>
+                            {type.charAt(0).toUpperCase() + type.slice(1)}
+                          </ThemedText>
+                        </Pressable>
+                      ))}
+                    </View>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <ThemedText style={{ marginRight: 8 }}>Every</ThemedText>
+                      <Picker
+                        selectedValue={repeatEvery}
+                        onValueChange={v => setRepeatEvery(Number(v))}
+                        style={{ width: 80, color: colors[colorScheme].text }}
+                        dropdownIconColor={colors[colorScheme].text}
+                      >
+                        {Array.from({ length: 30 }, (_, i) => i + 1).map(num => (
+                          <Picker.Item key={num} label={String(num)} value={num} />
+                        ))}
+                      </Picker>
+                      <ThemedText style={{ marginLeft: 8 }}>
+                        {repeatType === 'daily' ? 'day(s)' : repeatType === 'weekly' ? 'week(s)' : 'month(s)'}
+                      </ThemedText>
+                    </View>
+                    {repeatType === 'weekly' && (
+                      <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: 12 }}>
+                        {WEEKDAYS.map((day, idx) => (
+                          <Pressable
+                            key={day}
+                            onPress={() => handleToggleWeekday(idx)}
+                            style={{
+                              paddingVertical: 6,
+                              paddingHorizontal: 12,
+                              borderRadius: 8,
+                              backgroundColor: repeatDaysOfWeek.includes(idx) ? colors[colorScheme].tint : 'transparent',
+                              marginRight: 6,
+                              marginBottom: 6,
+                              borderWidth: 1,
+                              borderColor: colors[colorScheme].tabIconDefault,
+                            }}
+                          >
+                            <ThemedText style={{ color: repeatDaysOfWeek.includes(idx) ? colors[colorScheme].background : colors[colorScheme].text }}>
+                              {day}
+                            </ThemedText>
+                          </Pressable>
+                        ))}
+                      </View>
+                    )}
+                    {repeatType === 'monthly' && (
+                      <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: 12 }}>
+                        {MONTH_DAYS.map(day => (
+                          <Pressable
+                            key={day}
+                            onPress={() => handleToggleMonthDay(day)}
+                            style={{
+                              width: 36,
+                              height: 36,
+                              borderRadius: 18,
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              backgroundColor: repeatDaysOfMonth.includes(day) ? colors[colorScheme].tint : 'transparent',
+                              margin: 2,
+                              borderWidth: 1,
+                              borderColor: colors[colorScheme].tabIconDefault,
+                            }}
+                          >
+                            <ThemedText style={{ color: repeatDaysOfMonth.includes(day) ? colors[colorScheme].background : colors[colorScheme].text }}>
+                              {day}
+                            </ThemedText>
+                          </Pressable>
+                        ))}
+                      </View>
+                    )}
+                  </View>
+                ) : (
+                  <View style={{ marginTop: 16 }}>
                     <Pressable
-                      key={type.value}
-                      onPress={() => setGoalType(type.value as 'min' | 'max' | 'precise')}
+                      onPress={() => setShowDatePicker(true)}
                       style={{
-                        paddingVertical: 6,
-                        paddingHorizontal: 12,
+                        padding: 12,
                         borderRadius: 8,
-                        backgroundColor: goalType === type.value ? colors[colorScheme].tint : 'transparent',
-                        marginRight: 8,
+                        backgroundColor: colors[colorScheme].frame,
                         borderWidth: 1,
                         borderColor: colors[colorScheme].tabIconDefault,
+                        alignItems: 'center',
                       }}
                     >
-                      <ThemedText style={{ color: goalType === type.value ? colors[colorScheme].background : colors[colorScheme].text }}>
-                        {type.label}
+                      <ThemedText>
+                        {`Date: ${repeatDate.toLocaleDateString()}`}
                       </ThemedText>
                     </Pressable>
-                  ))}
-                </View>
+                    {showDatePicker && (
+                      <DateTimePicker
+                        value={repeatDate}
+                        mode="date"
+                        display="default"
+                        onChange={(_, selectedDate) => {
+                          setShowDatePicker(false);
+                          if (selectedDate) setRepeatDate(selectedDate);
+                        }}
+                      />
+                    )}
+                  </View>
+                )}
               </View>
-            )}
-            {!!error && (
-              <ThemedText style={{ color: colors[colorScheme].error, marginTop: 12 }}>{error}</ThemedText>
-            )}
-          </ThemedView>
+              {!!error && (
+                <ThemedText style={{ color: colors[colorScheme].error, marginTop: 12 }}>{error}</ThemedText>
+              )}
+            </ThemedView>
 
-          <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-            <Pressable
-              onPress={() => router.back()}
-              style={[
-                styles.button,
-                {
-                  flex: 1,
-                  marginRight: 8,
-                  backgroundColor: colors[colorScheme].frame,
-                },
-              ]}
-            >
-              <ThemedText style={{ textAlign: "center" }}>Cancel</ThemedText>
-            </Pressable>
-
-            <Pressable
-              onPress={handleEditHabit}
-              style={[
-                styles.button,
-                {
-                  flex: 1,
-                  marginLeft: 8,
-                  backgroundColor: colors[colorScheme].tint,
-                  opacity: habitName.trim() ? 1 : 0.5,
-                },
-              ]}
-            >
-              <ThemedText
-                style={{ textAlign: "center", color: colors[colorScheme].background }}
+            <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+              <Pressable
+                onPress={() => router.back()}
+                style={[
+                  styles.button,
+                  {
+                    flex: 1,
+                    marginRight: 8,
+                    backgroundColor: colors[colorScheme].frame,
+                  },
+                ]}
               >
-                Save
-              </ThemedText>
-            </Pressable>
-          </View>
+                <ThemedText style={{ textAlign: "center" }}>Cancel</ThemedText>
+              </Pressable>
+
+              <Pressable
+                onPress={handleEditHabit}
+                style={[
+                  styles.button,
+                  {
+                    flex: 1,
+                    marginLeft: 8,
+                    backgroundColor: colors[colorScheme].tint,
+                    opacity: habitName.trim() ? 1 : 0.5,
+                  },
+                ]}
+              >
+                <ThemedText
+                  style={{ textAlign: "center", color: colors[colorScheme].background }}
+                >
+                  Save
+                </ThemedText>
+              </Pressable>
+            </View>
+          </ScrollView>
         </SafeAreaView>
       </KeyboardAvoidingView>
     </LinearGradient>
