@@ -13,6 +13,7 @@ interface HabitsContextType {
   addHabit: (title: string) => Promise<void>;
   toggleHabit: (id: string) => Promise<void>;
   deleteHabit: (id: string) => Promise<void>;
+  editHabit: (id: string, newTitle: string) => Promise<void>;
 }
 
 const HabitsContext = createContext<HabitsContextType | undefined>(undefined);
@@ -71,8 +72,16 @@ export function HabitsProvider({ children }: { children: React.ReactNode }) {
     await saveHabits(updatedHabits);
   };
 
+  const editHabit = async (id: string, newTitle: string) => {
+    const updatedHabits = habits.map(habit =>
+      habit.id === id ? { ...habit, title: newTitle } : habit
+    );
+    setHabits(updatedHabits);
+    await saveHabits(updatedHabits);
+  };
+
   return (
-    <HabitsContext.Provider value={{ habits, addHabit, toggleHabit, deleteHabit }}>
+    <HabitsContext.Provider value={{ habits, addHabit, toggleHabit, deleteHabit, editHabit }}>
       {children}
     </HabitsContext.Provider>
   );
