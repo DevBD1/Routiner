@@ -7,6 +7,7 @@ import {
   ColorValue,
   KeyboardAvoidingView,
   Platform,
+  Switch,
 } from "react-native";
 import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
@@ -18,9 +19,22 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { useHabits } from "@/context/HabitsContext";
 
+const UNITS = [
+  "min", "hour", "glass", "ml", "kg", "g", "lb", "oz", "km", "liter", "mile", "piece"
+];
+const GOAL_TYPES = [
+  { label: "Minimum", value: "min" },
+  { label: "Maximum", value: "max" },
+  { label: "Precise", value: "precise" },
+];
+
 const AddHabitScreen: React.FC = () => {
   const colorScheme = useColorScheme() ?? "light";
   const [habitName, setHabitName] = useState("");
+  const [goalEnabled, setGoalEnabled] = useState(false);
+  const [goalValue, setGoalValue] = useState<string>("");
+  const [goalUnit, setGoalUnit] = useState<string>(UNITS[0]);
+  const [goalType, setGoalType] = useState<'min' | 'max' | 'precise'>("min");
   const { addHabit } = useHabits();
 
   const darkGradient: [ColorValue, ColorValue, ColorValue] = [
@@ -36,13 +50,21 @@ const AddHabitScreen: React.FC = () => {
 
   const handleAddHabit = async () => {
     if (!habitName.trim()) return;
-    
     try {
-      await addHabit(habitName.trim());
+      await addHabit(habitName.trim(), goalEnabled ? {
+        goalEnabled,
+        goalValue: goalValue ? parseInt(goalValue, 10) : null,
+        goalUnit,
+        goalType,
+      } : {
+        goalEnabled: false,
+        goalValue: null,
+        goalUnit: null,
+        goalType: null,
+      });
       router.back();
     } catch (error) {
       console.error('Error adding habit:', error);
-      // TODO: Show error message to user
     }
   };
 
@@ -84,6 +106,68 @@ const AddHabitScreen: React.FC = () => {
               returnKeyType="done"
               onSubmitEditing={handleAddHabit}
             />
+            <View style={{ flexDirection: "row", alignItems: "center", marginTop: 16 }}>
+              <ThemedText style={{ marginRight: 8 }}>Set goal</ThemedText>
+              <Switch
+                value={goalEnabled}
+                onValueChange={setGoalEnabled}
+                thumbColor={goalEnabled ? colors[colorScheme].tint : colors[colorScheme].tabIconDefault}
+                trackColor={{ true: colors[colorScheme].tint, false: colors[colorScheme].tabIconDefault }}
+              />
+            </View>
+            {goalEnabled && (
+              <View style={{ marginTop: 16 }}>
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <TextInput
+                    placeholder="Value"
+                    placeholderTextColor={colors[colorScheme].tabIconDefault}
+                    value={goalValue}
+                    onChangeText={setGoalValue}
+                    keyboardType="numeric"
+                    style={{
+                      fontSize: 16,
+                      color: colors[colorScheme].text,
+                      borderBottomWidth: 1,
+                      borderBottomColor: colors[colorScheme].tabIconDefault,
+                      width: 60,
+                      marginRight: 8,
+                    }}
+                  />
+                  {/* Unit Picker */}
+                  <View style={{ borderBottomWidth: 1, borderBottomColor: colors[colorScheme].tabIconDefault }}>
+                    <TextInput
+                      value={goalUnit}
+                      onChangeText={setGoalUnit}
+                      style={{ fontSize: 16, color: colors[colorScheme].text, width: 70 }}
+                      placeholder="Unit"
+                      placeholderTextColor={colors[colorScheme].tabIconDefault}
+                    />
+                  </View>
+                </View>
+                {/* Goal Type Picker */}
+                <View style={{ flexDirection: "row", marginTop: 12 }}>
+                  {GOAL_TYPES.map((type) => (
+                    <Pressable
+                      key={type.value}
+                      onPress={() => setGoalType(type.value as 'min' | 'max' | 'precise')}
+                      style={{
+                        paddingVertical: 6,
+                        paddingHorizontal: 12,
+                        borderRadius: 8,
+                        backgroundColor: goalType === type.value ? colors[colorScheme].tint : 'transparent',
+                        marginRight: 8,
+                        borderWidth: 1,
+                        borderColor: colors[colorScheme].tabIconDefault,
+                      }}
+                    >
+                      <ThemedText style={{ color: goalType === type.value ? colors[colorScheme].background : colors[colorScheme].text }}>
+                        {type.label}
+                      </ThemedText>
+                    </Pressable>
+                  ))}
+                </View>
+              </View>
+            )}
           </ThemedView>
 
           <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
