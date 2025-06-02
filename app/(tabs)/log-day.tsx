@@ -6,10 +6,12 @@ import { ThemedView } from '@/components/ThemedView';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { usePremium } from '@/context/PremiumContext';
 import { colors } from '@/constants/colors';
+import { useHabits } from '@/context/HabitsContext';
 
 export default function LogDayScreen() {
   const colorScheme = useColorScheme() ?? 'light';
   const { isPremium, processAiInput } = usePremium();
+  const { habits } = useHabits();
   const [text, setText] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState<string | null>(null);
@@ -19,8 +21,11 @@ export default function LogDayScreen() {
     setIsProcessing(true);
     setResult(null);
     try {
-      // For now, just call the mock AI function
-      const value = await processAiInput(text, {});
+      // Find the first habit with a goal unit to use as context
+      const habitWithUnit = habits.find(h => h.goalEnabled && h.goalUnit);
+      const habit = habitWithUnit || { title: 'General Activity', goalUnit: 'min' };
+      
+      const value = await processAiInput(text, habit);
       setResult(`AI processed value: ${value}`);
       setText('');
     } catch (error) {

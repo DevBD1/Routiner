@@ -201,7 +201,11 @@ const AddHabitScreen: React.FC = () => {
                       <Picker
                         selectedValue={goalUnit}
                         onValueChange={setGoalUnit}
-                        style={{ color: colors[colorScheme].text, backgroundColor: 'transparent' }}
+                        style={{
+                          color: colors[colorScheme].text,
+                          backgroundColor: colors[colorScheme].frame,
+                          borderRadius: 8,
+                        }}
                         dropdownIconColor={colors[colorScheme].text}
                       >
                         {UNITS.map((unit) => (
@@ -276,8 +280,14 @@ const AddHabitScreen: React.FC = () => {
                       <Picker
                         selectedValue={repeatEvery}
                         onValueChange={v => setRepeatEvery(Number(v))}
-                        style={{ width: 80, color: colors[colorScheme].text }}
+                        style={{
+                          width: 80,
+                          color: colors[colorScheme].text,
+                          backgroundColor: colors[colorScheme].frame,
+                        }}
                         dropdownIconColor={colors[colorScheme].text}
+
+                        
                       >
                         {Array.from({ length: 30 }, (_, i) => i + 1).map(num => (
                           <Picker.Item key={num} label={String(num)} value={num} />
