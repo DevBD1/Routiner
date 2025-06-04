@@ -5,12 +5,15 @@
     "paths": {
       "@/*": ["./*"] // map "@/foo/bar" → "<projectRoot>/foo/bar"
     },
-    "types": ["node"]
+    "types": ["node"],
+    "moduleResolution": "node",
+    "resolveJsonModule": true
   },
   "include": [
-    "app/**/*", // ← include Expo Router’s app folder
+    "app/**/*", // ← include Expo Router's app folder
     "components/**/*", // your shared styles/components
     "types/**/*",
+    "src/**/*",
     "constants/styles.ts",
     "components/ui",
     "components/Collapsible.tsx",
