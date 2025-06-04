@@ -1,0 +1,15 @@
+{
+  "aiModels": {
+    "ollama-3_2": {
+      "name": "Ollama 3.2",
+      "available": true,
+      "type": "ollama"
+    },
+    "gpt-4_1-Nano": {
+      "name": "ChatGPT 4o Nano",
+      "available": true,
+      "type": "openai",
+      "model": "gpt-4.1-nano"
+    }
+  }
+} 
