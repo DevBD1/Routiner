@@ -3,7 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import SettingsService from '../services/settingsService';
 import { AIModel } from '../services/settingsService';
-
+ 
 interface AIModelSelectorProps {
   selectedModel: string;
   setSelectedModel: (modelKey: string) => void;

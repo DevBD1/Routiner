@@ -6,7 +6,7 @@ import { generateResponse, extractNumericValue, OllamaError } from '../services/
 const debugLog = (section: string, data: any) => {
   console.log(`[Premium Debug] ${section}:`, JSON.stringify(data, null, 2));
 };
-
+ 
 interface PremiumContextType {
   isPremium: boolean;
   activatePremium: () => Promise<void>;

@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SETTINGS_STORAGE_KEY = '@routiner_settings';
 const SETTINGS_URL = 'https://raw.githubusercontent.com/DevBD1/Routiner/main/settings.json';
-
+ 
 // Default settings to use as fallback
 const DEFAULT_SETTINGS: Settings = {
   aiModels: {

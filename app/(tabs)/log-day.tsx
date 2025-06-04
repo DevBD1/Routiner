@@ -117,4 +117,4 @@ export default function LogDayScreen() {
       </ThemedView>
     </ScrollView>
   );
-} 
+}  
