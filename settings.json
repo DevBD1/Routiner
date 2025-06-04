@@ -6,7 +6,7 @@
       "type": "ollama"
     },
     "gpt-4_1-Nano": {
-      "name": "ChatGPT 4o Nano",
+      "name": "ChatGPT 4.1 Nano",
       "available": true,
       "type": "openai",
       "model": "gpt-4.1-nano"
