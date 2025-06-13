@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
 import SettingsService, { AIModel } from './settingsService';
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { OPENAI_API_KEY, GEMINI_API_KEY, OLLAMA_HOST } from '@env';
 
 const keysConfig = {
@@ -13,7 +13,7 @@ class AIService {
   private static instance: AIService;
   private openai: OpenAI;
   private settingsService: SettingsService;
-  private gemini: GoogleGenAI;
+  private gemini: GoogleGenerativeAI;
 
   private constructor() {
     if (!keysConfig.OPENAI_API_KEY || !keysConfig.GEMINI_API_KEY || !keysConfig.OLLAMA_HOST) {
@@ -25,7 +25,7 @@ class AIService {
       dangerouslyAllowBrowser: true,
     });
     this.settingsService = SettingsService.getInstance();
-    this.gemini = new GoogleGenAI({ apiKey: keysConfig.GEMINI_API_KEY });
+    this.gemini = new GoogleGenerativeAI(keysConfig.GEMINI_API_KEY);
   }
 
   static getInstance(): AIService {
@@ -115,11 +115,10 @@ class AIService {
   private async generateGeminiResponse(model: string, prompt: string): Promise<string> {
     try {
       console.log('[AIService] Sending to Gemini model:', model);
-      const response = await this.gemini.models.generateContent({
-        model: model,
-        contents: prompt,
-      });
-      const text = response.text;
+      const geminiModel = this.gemini.getGenerativeModel({ model: model });
+      const result = await geminiModel.generateContent(prompt);
+      const response = await result.response;
+      const text = response.text();
       if (!text) {
         throw new Error('Empty response from Gemini API');
       }
