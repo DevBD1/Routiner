@@ -11,6 +11,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.devbd1.routiner",
+      "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -38,9 +39,18 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ],
+      ], 
       "@react-native-firebase/app",
-      "@react-native-firebase/auth"
+      "@react-native-firebase/auth",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static",
+            "modular_headers": true
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
