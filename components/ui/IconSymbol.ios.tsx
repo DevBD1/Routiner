@@ -1,5 +1,6 @@
 import { SymbolView, SymbolViewProps, SymbolWeight } from "expo-symbols";
 import { StyleProp, ViewStyle } from "react-native";
+import React from "react";
 
 export function IconSymbol({
   name,
@@ -29,4 +30,13 @@ export function IconSymbol({
       ]}
     />
   );
+}
+
+// Export a createTabIcon function for iOS
+export function createTabIcon(iconName: SymbolViewProps["name"]): React.FC<{ color: string }> {
+  const IconComponent: React.FC<{ color: string }> = ({ color }) => (
+    <IconSymbol name={iconName} color={color} />
+  );
+  IconComponent.displayName = `TabIcon(${iconName})`;
+  return IconComponent;
 }

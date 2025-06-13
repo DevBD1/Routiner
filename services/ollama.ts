@@ -1,11 +1,7 @@
-import { Ollama } from 'ollama';
 import { Platform } from 'react-native';
 
 // Configuration
-const OLLAMA_HOST = 'http://185.169.180.7:11434';
-
-// Initialize Ollama client
-const ollama = new Ollama({ host: OLLAMA_HOST });
+const OLLAMA_BACKEND_URL = 'http://localhost:3001/api/generate'; // Update with your backend URL
 
 // Debug logging utility
 const debugLog = (section: string, data: any) => {
@@ -25,34 +21,30 @@ const isWebEnvironment = Platform.OS === 'web';
 // API Functions
 export const generateResponse = async (prompt: string): Promise<string> => {
   debugLog('API Request', {
-    host: OLLAMA_HOST,
+    host: OLLAMA_BACKEND_URL,
     prompt,
     environment: isWebEnvironment ? 'web' : 'native',
     timestamp: new Date().toISOString()
   });
 
   try {
-    const response = await ollama.chat({
-      model: 'llama3.2',
-      messages: [
-        {
-          role: 'user',
-          content: prompt
-        }
-      ],
-      options: {
-        temperature: 0.1,
-        num_predict: 50,
-      }
+    const response = await fetch(OLLAMA_BACKEND_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt }),
     });
-
-    debugLog('AI Response', {
-      model: response.model,
-      response: response.message?.content,
-      timestamp: new Date().toISOString()
-    });
-
-    return response.message?.content || '';
+    if (!response.ok) {
+      throw new OllamaError('Failed to fetch from backend', { status: response.status });
+    }
+    const data = await response.json();
+    if (data && data.response) {
+      debugLog('AI Response', {
+        response: data.response,
+        timestamp: new Date().toISOString()
+      });
+      return data.response;
+    }
+    throw new OllamaError('Invalid response from backend');
   } catch (error: unknown) {
     debugLog('Error Details', {
       name: error instanceof Error ? error.name : 'Unknown',
@@ -68,10 +60,7 @@ export const generateResponse = async (prompt: string): Promise<string> => {
       });
     }
 
-    throw new OllamaError('Failed to generate response', { 
-      type: 'GENERATION_ERROR',
-      originalError: error 
-    });
+    throw new OllamaError('Failed to generate response', { originalError: error });
   }
 };
 

@@ -82,16 +82,12 @@ class AIService {
 
   private async generateOllamaResponse(prompt: string): Promise<string> {
     try {
-      const response = await fetch(`${keysConfig.OLLAMA_HOST}/api/generate`, {
+      const response = await fetch('http://localhost:3001/api/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          model: 'llama2',
-          prompt: prompt,
-          stream: false
-        })
+        body: JSON.stringify({ prompt }),
       });
 
       if (!response.ok) {
