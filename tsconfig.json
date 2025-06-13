@@ -3,21 +3,31 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"] // map "@/foo/bar" → "<projectRoot>/foo/bar"
+      "@/*": [
+        "./*"
+      ]
     },
-    "types": ["node"],
+    "types": [
+      "node"
+    ],
     "moduleResolution": "node",
     "resolveJsonModule": true
   },
   "include": [
-    "app/**/*", // ← include Expo Router's app folder
-    "components/**/*", // your shared styles/components
+    "app/**/*",
+    "components/**/*",
     "types/**/*",
     "src/**/*",
     "constants/styles.ts",
     "components/ui",
     "components/Collapsible.tsx",
-    "components/HelloWave.tsx"
+    "components/HelloWave.tsx",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts"
   ],
-  "exclude": [".git", "node_modules", "dist"]
+  "exclude": [
+    ".git",
+    "node_modules",
+    "dist"
+  ]
 }
