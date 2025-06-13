@@ -17,7 +17,8 @@ export default {
     ],
     ios: {
       supportsTablet: true,
-      bundleIdentifier: "com.devbd1.routiner"
+      bundleIdentifier: "com.devbd1.routiner",
+      ITSAppUsesNonExemptEncryption: false
     },
     android: {
       adaptiveIcon: {
