@@ -2,7 +2,7 @@
   "aiModels": {
     "ollama-3_2": {
       "name": "Ollama 3.2",
-      "available": true,
+      "available": false,
       "type": "ollama"
     },
     "gpt-4_1-Nano": {
