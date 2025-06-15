@@ -6,7 +6,6 @@ import { createTabIcon } from "@/components/ui/IconSymbol";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { HapticTab } from "@/components/HapticTab";
-import TabBarBackground from "@/components/ui/TabBarBackground";
 import { colors } from "@/constants/colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 
@@ -24,13 +23,13 @@ export default function TabLayout() {
 
   const commonTabBarStyle = {
     backgroundColor: colors[colorScheme].frame,
-    height: 60,
+    height: Platform.OS === 'ios' ? 85 : 60,
     elevation: 0,
     shadowOpacity: 0,
     borderTopWidth: 0,
     borderWidth: 0,
     paddingTop: 0,
-    paddingBottom: 0,
+    paddingBottom: Platform.OS === 'ios' ? 20 : 0,
   };
 
   return (
@@ -57,17 +56,7 @@ export default function TabLayout() {
         tabBarInactiveTintColor: colors[colorScheme].tabIconDefault,
         tabBarShowLabel: false,
         tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
-        tabBarStyle: {
-          ...commonTabBarStyle,
-          ...Platform.select({
-            ios: {
-              // on iOS we want it absolute so the blur shows through
-              position: "absolute",
-            },
-            default: {}, // on Android/web etc. just stick to commonTabBarStyle
-          }),
-        },
+        tabBarStyle: commonTabBarStyle,
       }}
     >
       <Tabs.Screen

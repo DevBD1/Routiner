@@ -14,7 +14,7 @@
       },
       "oauth_client": [
         {
-          "client_id": "74325799052-uk08ek1mfjep4c3hm08n7d2ivd7sm0iq.apps.googleusercontent.com",
+          "client_id": "74325799052-q3o11a4n0ohp1k5nncjhqeplvs2to7v6.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
@@ -27,14 +27,14 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "74325799052-uk08ek1mfjep4c3hm08n7d2ivd7sm0iq.apps.googleusercontent.com",
+              "client_id": "74325799052-q3o11a4n0ohp1k5nncjhqeplvs2to7v6.apps.googleusercontent.com",
               "client_type": 3
             },
             {
-              "client_id": "74325799052-jq5lf1k2djt4bludps7l1gl80s9p7fdl.apps.googleusercontent.com",
+              "client_id": "74325799052-hg840me3lk34p0qej9s0amrcpp31rp3b.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.BurakDorman.Routiner"
+                "bundle_id": "com.devbd1.routiner"
               }
             }
           ]

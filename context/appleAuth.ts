@@ -9,15 +9,29 @@ export async function signInWithApple(auth: Auth): Promise<AuthCredential> {
   }
 
   try {
+    // Check if Apple authentication is available
+    const isAvailable = await AppleAuthentication.isAvailableAsync();
+    if (!isAvailable) {
+      throw new Error('Apple authentication is not available on this device');
+    }
+
     const nonce = Math.random().toString(36).substring(2);
     const hashedNonce = sha256(nonce);
 
+    console.log('Starting Apple Sign In process...');
+    
     const credential = await AppleAuthentication.signInAsync({
       requestedScopes: [
         AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
         AppleAuthentication.AppleAuthenticationScope.EMAIL,
       ],
       nonce: hashedNonce,
+    });
+
+    console.log('Apple Sign In response received:', {
+      hasIdentityToken: !!credential.identityToken,
+      hasEmail: !!credential.email,
+      hasFullName: !!credential.fullName,
     });
 
     if (!credential.identityToken) {
@@ -32,7 +46,12 @@ export async function signInWithApple(auth: Auth): Promise<AuthCredential> {
 
     return oAuthCredential;
   } catch (error) {
-    console.error('Apple Sign In Error:', error);
+    console.error('Apple Sign In Error Details:', {
+      message: error.message,
+      code: error.code,
+      name: error.name,
+      stack: error.stack,
+    });
     throw error;
   }
 } 

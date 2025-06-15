@@ -4,6 +4,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   ImageBackground,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../context/AuthContext";
@@ -37,8 +38,15 @@ export default function LoginScreen() {
     try {
       await signInWithApple();
       router.replace("/(tabs)");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Apple sign in error:", error);
+      // Show a more user-friendly error message
+      const errorMessage = error?.message || 'Failed to sign in with Apple';
+      Alert.alert(
+        'Sign In Error',
+        errorMessage,
+        [{ text: 'OK' }]
+      );
     }
   };
 

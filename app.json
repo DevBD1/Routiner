@@ -13,7 +13,14 @@
       "bundleIdentifier": "com.devbd1.routiner",
       "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLSchemes": [
+              "routiner"
+            ]
+          }
+        ]
       }
     },
     "android": {
