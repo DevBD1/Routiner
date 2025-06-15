@@ -2,6 +2,10 @@
 android/
 ios/
 .vscode/
+.expo/
+
+google-services.json
+GoogleService-Info.plist
 
 # dependencies
 node_modules/
