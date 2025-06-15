@@ -21,7 +21,9 @@
     "constants/styles.ts",
     "components/ui",
     "components/Collapsible.tsx",
-    "components/HelloWave.tsx"
+    "components/HelloWave.tsx",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts"
   ],
   "exclude": [
     ".git",

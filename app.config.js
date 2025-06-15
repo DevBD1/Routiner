@@ -69,7 +69,8 @@ export default {
       ]
     ],
     experiments: {
-      typedRoutes: true
+      typedRoutes: true,
+      tsconfigPaths: true
     },
     extra: {
       router: {
