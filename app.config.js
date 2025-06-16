@@ -2,6 +2,7 @@ import 'dotenv/config';
 
 export default {
   expo: {
+    scheme: 'routiner',
     // ...other config
     extra: {
       FIREBASE_API_KEY: process.env.FIREBASE_API_KEY,
