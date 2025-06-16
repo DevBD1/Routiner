@@ -3,6 +3,8 @@ android/
 ios/
 .vscode/
 .expo/
+.archive
+.routiner/
 
 google-services.json
 GoogleService-Info.plist
