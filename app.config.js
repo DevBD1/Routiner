@@ -13,8 +13,8 @@ export default {
       supportsTablet: true,
       bundleIdentifier: "com.devbd1.routiner",
       googleServicesFile: "./GoogleService-Info.plist",
-      ITSAppUsesNonExemptEncryption: false,
       infoPlist: {
+        "ITSAppUsesNonExemptEncryption": false,
         CFBundleURLTypes: [
           {
             CFBundleURLSchemes: [
