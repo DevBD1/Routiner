@@ -1,13 +1,13 @@
 export const PALETTE = {
-  white: '#FFFFFF',
+  white: '#F5F5F5',
   black: '#121712',
   olive: '#2E3829',
   sage: '#A6B5A1',
   forest: '#1F261C',
-  darkGreen: '#121A0F',
+  darkGreen: '#23281e',
   lightGreen: '#EBF2E8',
   vividGreen: '#619154',
-  brightGreen: '#8CD178',
+  brightGreen: '#8CD178', 
 };
 
 export default {
@@ -17,10 +17,11 @@ export default {
     tabBar: PALETTE.white,
     tint: PALETTE.lightGreen,
     tabIconDefault: PALETTE.vividGreen,
-    tabIconSelected: PALETTE.olive,
+    tabIconSelected: PALETTE.black,
     button1: PALETTE.olive,
     button2: PALETTE.brightGreen,
     checkbox: PALETTE.olive,
+    box: PALETTE.white,
   },
   dark: {
     text: PALETTE.white,
@@ -32,6 +33,7 @@ export default {
     button1: PALETTE.olive,
     button2: PALETTE.brightGreen,
     checkbox: PALETTE.olive,
+    box: PALETTE.darkGreen,
   },
   palette: PALETTE,
 };

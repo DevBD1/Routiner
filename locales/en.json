@@ -1,7 +1,15 @@
 {
     "settings": "Settings",
-    "premium": "Premium",
+    "premium_tag": "Premium",
+    "premium_toggle": "Toggle premium perks.",
     "language": "Language",
     "logout": "Log out",
-    "logged_out_message": "You have been logged out."
+    "logged_out_message": "You have been logged out.",
+    "app_info": "App Info",
+    "version": "Version",
+    "developer": "Developer",
+    "terms_of_usage": "Terms of Usage",
+    "github_repository": "GitHub Repository",
+    "not_logged_in": "Anonymous User",
+    "motto": "Build your habits."
   }

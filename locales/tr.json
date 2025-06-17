@@ -1,7 +1,15 @@
 {
     "settings": "Ayarlar",
-    "premium": "Premium",
+    "premium_tag": "Premium",
+    "premium_toggle": "Premium özelliklerini etkinleştir.",
     "language": "Dil",
     "logout": "Çıkış Yap",
-    "logged_out_message": "Çıkış yapıldı."
+    "logged_out_message": "Çıkış yapıldı.",
+    "app_info": "Uygulama Bilgisi",
+    "version": "Versiyon",
+    "developer": "Geliştirici",
+    "terms_of_usage": "Kullanım Koşulları",
+    "github_repository": "GitHub Repo'su",
+    "not_logged_in": "Anonim Kullanıcı",
+    "motto": "Rutinini oluştur."
   }

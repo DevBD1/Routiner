@@ -4,9 +4,9 @@ import Colors from './Colors';
 const GlobalStyles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Colors.light.background,
+    alignItems: 'stretch',
+    justifyContent: 'flex-start',
+    //backgroundColor: Colors.light.background,
   },
   title: {
     fontSize: 28,
@@ -44,5 +44,20 @@ const GlobalStyles = StyleSheet.create({
     color: Colors.light.tint,
   },
 });
+
+export function box(colorScheme: 'light' | 'dark') { 
+  return {
+    backgroundColor: Colors[colorScheme].box,
+    borderRadius: 16,
+    marginHorizontal: 16,
+    marginTop: 24,
+    marginBottom: 8,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
+  };
+}
 
 export default GlobalStyles; 

@@ -7,6 +7,7 @@ import colors from '@/constants/Colors';
 import { useColorScheme } from '@/components/useColorScheme';
 import { useClientOnlyValue } from '@/components/useClientOnlyValue';
 import { View, Text } from '@/components/Themed';
+import i18n from '@/i18n';
 
 // You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
 function TabBarIcon(props: {
@@ -41,19 +42,19 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerStyle: commonHeaderStyle,
-        headerShown: false, //useClientOnlyValue(false, true)
+        headerShown: true, //useClientOnlyValue(false, true)
         headerTitle: "",
         headerTitleAlign: "center",
         headerTintColor: colors[colorScheme].tint,
         headerTransparent: false,
         headerLeft: () => (
           <View style={{ paddingLeft: 16, backgroundColor: colors[colorScheme].tabBar }}>
-            <Text>Routiner</Text>
+            <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Routiner</Text>
           </View>
         ),
         headerRight: () => (
           <View style={{ paddingRight: 16, backgroundColor: colors[colorScheme].tabBar }}>
-            <Text>Build your habits.</Text>
+            <Text>{i18n.t('motto')}</Text>
           </View>
         ),
         
