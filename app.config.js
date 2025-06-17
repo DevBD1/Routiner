@@ -2,9 +2,48 @@ import 'dotenv/config';
 
 export default {
   expo: {
+    owner: "devbd1",
+    name: "Routiner",
+    slug: "routiner",
+    version: "1.0.0",
+    orientation: "portrait",
+    icon: "./assets/images/routiner_icon.png",
     scheme: 'routiner',
-    // ...other config
+    ios: {
+      supportsTablet: true,
+      bundleIdentifier: "com.devbd1.routiner",
+      googleServicesFile: "./GoogleService-Info.plist",
+      ITSAppUsesNonExemptEncryption: false,
+      infoPlist: {
+        CFBundleURLTypes: [
+          {
+            CFBundleURLSchemes: [
+              "routiner"
+            ]
+          }
+        ]
+      }
+    },
+    android: {
+      adaptiveIcon: {
+        foregroundImage: "./assets/images/adaptive-icon.png",
+        backgroundColor: "#ffffff"
+      },
+      package: "com.devbd1.routiner",
+      googleServicesFile: "./google-services.json"
+    },
+    web: {
+      bundler: "metro",
+      output: "static",
+      favicon: "./assets/images/favicon.png"
+    },
+    plugins: [
+      'expo-localization',
+    ],
     extra: {
+      eas: {
+        projectId: "351b6748-97e9-4918-a5ce-867db8edeb15"
+      },
       FIREBASE_API_KEY: process.env.FIREBASE_API_KEY,
       FIREBASE_AUTH_DOMAIN: process.env.FIREBASE_AUTH_DOMAIN,
       FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID,

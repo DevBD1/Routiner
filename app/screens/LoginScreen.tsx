@@ -1,15 +1,25 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions, Image, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Dimensions, Image, Alert, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
 import * as AppleAuthentication from 'expo-apple-authentication';
-import { getAuth, signInWithCredential, GoogleAuthProvider, signInAnonymously } from 'firebase/auth';
+import * as Crypto from 'expo-crypto';
+import { getAuth, signInWithCredential, GoogleAuthProvider, signInAnonymously, OAuthProvider } from 'firebase/auth';
 import firebaseApp from '../../firebaseConfig';
 import Constants from 'expo-constants';
 
 const { width } = Dimensions.get('window');
 WebBrowser.maybeCompleteAuthSession();
+
+function randomNonce(length = 32) {
+  const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
 
 export default function LoginScreen() {
   const auth = getAuth(firebaseApp);
@@ -31,16 +41,33 @@ export default function LoginScreen() {
 
   const handleAppleSignIn = async () => {
     try {
+      const rawNonce = randomNonce();
+      const hashedNonce = await Crypto.digestStringAsync(
+        Crypto.CryptoDigestAlgorithm.SHA256,
+        rawNonce
+      );
       const appleCredential = await AppleAuthentication.signInAsync({
         requestedScopes: [
           AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
           AppleAuthentication.AppleAuthenticationScope.EMAIL,
         ],
+        nonce: hashedNonce,
       });
-      // You need to set up Apple auth with Firebase custom auth if needed
-      Alert.alert('Apple Sign-In', 'Apple sign-in is not fully implemented.');
-    } catch (err) {
-      if (err.code !== 'ERR_CANCELED') {
+      if (!appleCredential.identityToken) {
+        Alert.alert('Apple Sign-In Error', 'No identity token returned');
+        return;
+      }
+      // Use OAuthProvider for Apple
+      const provider = new OAuthProvider('apple.com');
+      const credential = provider.credential({
+        idToken: appleCredential.identityToken,
+        rawNonce: rawNonce,
+      });
+      await signInWithCredential(auth, credential);
+    } catch (err: any) {
+      if (err && typeof err === 'object' && 'code' in err && (err as any).code !== 'ERR_CANCELED') {
+        Alert.alert('Apple Sign-In Error', (err as any).message);
+      } else if (err instanceof Error) {
         Alert.alert('Apple Sign-In Error', err.message);
       }
     }
@@ -54,7 +81,11 @@ export default function LoginScreen() {
     try {
       await signInAnonymously(auth);
     } catch (err) {
-      Alert.alert('Anonymous Sign-In Error', err.message);
+      if (err && typeof err === 'object' && 'message' in err) {
+        Alert.alert('Anonymous Sign-In Error', (err as any).message);
+      } else if (err instanceof Error) {
+        Alert.alert('Anonymous Sign-In Error', err.message);
+      }
     }
   };
 
@@ -71,9 +102,11 @@ export default function LoginScreen() {
       <View style={styles.content}>
         <Text style={styles.title}>Routiner</Text>
         <Text style={styles.subtitle}>Build healthy habits and achieve your goals</Text>
-        <TouchableOpacity style={styles.appleButton} onPress={handleAppleSignIn}>
-          <Text style={styles.appleButtonText}>Continue with Apple</Text>
-        </TouchableOpacity>
+        {Platform.OS === 'ios' && (
+          <TouchableOpacity style={styles.appleButton} onPress={handleAppleSignIn}>
+            <Text style={styles.appleButtonText}>Continue with Apple</Text>
+          </TouchableOpacity>
+        )}
         <TouchableOpacity style={styles.googleButton} onPress={handleGoogleSignIn}>
           <Text style={styles.googleButtonText}>Continue with Google</Text>
         </TouchableOpacity>
