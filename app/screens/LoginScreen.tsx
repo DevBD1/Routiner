@@ -8,6 +8,7 @@ import * as Crypto from 'expo-crypto';
 import { getAuth, signInWithCredential, GoogleAuthProvider, signInAnonymously, OAuthProvider } from 'firebase/auth';
 import firebaseApp from '../../firebaseConfig';
 import Constants from 'expo-constants';
+import i18n from '@/i18n';
 
 const { width } = Dimensions.get('window');
 WebBrowser.maybeCompleteAuthSession();
@@ -34,7 +35,7 @@ export default function LoginScreen() {
       const { id_token } = response.params;
       const credential = GoogleAuthProvider.credential(id_token);
       signInWithCredential(auth, credential).catch((err) =>
-        Alert.alert('Google Sign-In Error', err.message)
+        Alert.alert(i18n.t('google_signin_error'), err.message)
       );
     }
   }, [response]);
@@ -54,7 +55,7 @@ export default function LoginScreen() {
         nonce: hashedNonce,
       });
       if (!appleCredential.identityToken) {
-        Alert.alert('Apple Sign-In Error', 'No identity token returned');
+        Alert.alert(i18n.t('apple_signin_error'), i18n.t('no_identity_token'));
         return;
       }
       // Use OAuthProvider for Apple
@@ -66,9 +67,9 @@ export default function LoginScreen() {
       await signInWithCredential(auth, credential);
     } catch (err: any) {
       if (err && typeof err === 'object' && 'code' in err && (err as any).code !== 'ERR_CANCELED') {
-        Alert.alert('Apple Sign-In Error', (err as any).message);
+        Alert.alert(i18n.t('apple_signin_error'), (err as any).message);
       } else if (err instanceof Error) {
-        Alert.alert('Apple Sign-In Error', err.message);
+        Alert.alert(i18n.t('apple_signin_error'), err.message);
       }
     }
   };
@@ -100,22 +101,22 @@ export default function LoginScreen() {
         <Image source={require('../../assets/images/routiner_icon.png')} style={styles.icon} resizeMode="contain" />
       </View>
       <View style={styles.content}>
-        <Text style={styles.title}>Routiner</Text>
-        <Text style={styles.subtitle}>Build healthy habits and achieve your goals</Text>
+        <Text style={styles.title}>{i18n.t('app_title')}</Text>
+        <Text style={styles.subtitle}>{i18n.t('app_subtitle')}</Text>
         {Platform.OS === 'ios' && (
           <TouchableOpacity style={styles.appleButton} onPress={handleAppleSignIn}>
-            <Text style={styles.appleButtonText}>Continue with Apple</Text>
+            <Text style={styles.appleButtonText}>{i18n.t('continue_with_apple')}</Text>
           </TouchableOpacity>
         )}
         <TouchableOpacity style={styles.googleButton} onPress={handleGoogleSignIn}>
-          <Text style={styles.googleButtonText}>Continue with Google</Text>
+          <Text style={styles.googleButtonText}>{i18n.t('continue_with_google')}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.anonButton} onPress={handleAnonSignIn}>
-          <Text style={styles.anonButtonText}>Continue Anonymously</Text>
+          <Text style={styles.anonButtonText}>{i18n.t('continue_anonymously')}</Text>
         </TouchableOpacity>
       </View>
       <Text style={styles.footerText}>
-        By continuing, you agree to our User Agreement and{"\n"}Privacy Policy.
+        {i18n.t('user_agreement_privacy_policy')}
       </Text>
     </View>
   );

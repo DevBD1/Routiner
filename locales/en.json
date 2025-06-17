@@ -11,5 +11,14 @@
     "terms_of_usage": "Terms of Usage",
     "github_repository": "GitHub Repository",
     "not_logged_in": "Anonymous User",
-    "motto": "Build your habits."
+    "motto": "Build your habits.",
+    "app_title": "Routiner",
+    "app_subtitle": "Build healthy habits and achieve your goals",
+    "continue_with_apple": "Continue with Apple",
+    "continue_with_google": "Continue with Google",
+    "continue_anonymously": "Continue Anonymously",
+    "user_agreement_privacy_policy": "By continuing, you agree to our User Agreement and\nPrivacy Policy.",
+    "google_signin_error": "Google Sign-In Error",
+    "apple_signin_error": "Apple Sign-In Error",
+    "no_identity_token": "No identity token returned"
   }

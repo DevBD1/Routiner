@@ -11,5 +11,14 @@
     "terms_of_usage": "Kullanım Koşulları",
     "github_repository": "GitHub Repo'su",
     "not_logged_in": "Anonim Kullanıcı",
-    "motto": "Rutinini oluştur."
+    "motto": "Rutinini oluştur.",
+    "app_title": "Routiner",
+    "app_subtitle": "Sağlıklı alışkanlıklar oluştur ve hedeflerine ulaş",
+    "continue_with_apple": "Apple ile Devam Et",
+    "continue_with_google": "Google ile Devam Et",
+    "continue_anonymously": "Anonim Devam Et",
+    "user_agreement_privacy_policy": "Devam ederek Kullanıcı Sözleşmesi ve\nGizlilik Politikamızı kabul etmiş olursunuz.",
+    "google_signin_error": "Google Giriş Hatası",
+    "apple_signin_error": "Apple Giriş Hatası",
+    "no_identity_token": "Kimlik belirteci alınamadı"
   }
