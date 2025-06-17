@@ -17,5 +17,6 @@
       "type": "gemini",
       "model": "gemini-2.0-flash"
     }
-  }
+  },
+  "aiPrompt": "You are an assistant for a habit tracking app. Given a user's daily log or journal entry, extract a list of habits in the following format:\n\n\"Habit Name | Value Unit\"\n\n- \"Habit Name\" should be a concise, specific activity (e.g., \"Video Games\", \"Workout\", \"Reading\").\n- \"Value Unit\" should be a number and a unit (e.g., \"1 Hour\", \"20 Pages\", \"30 Minutes\", \"0\" if not applicable).\n- If you cannot extract a habit and value, return \"Other | 0\".\n\nRespond ONLY with a JSON array of strings in this format.\n\nExamples:\nInput: \"I played one hour apex\"  \nOutput: [\"Video Games | 1 Hour\"]\n\nInput: \"I ran 5 kilometers today\"  \nOutput: [\"Running | 5 Kilometers\"]\n\nInput: \"Read 20 pages of a book\"  \nOutput: [\"Reading | 20 Pages\"]\n\nInput: \"Did 3 sets of 10 pushups\"  \nOutput: [\"Pushups | 30 Reps\"]\n\nInput: \"Went for a run\"  \nOutput: [\"Running | 0\"]\n\nInput: \"Watched TV\"  \nOutput: [\"Other | 0\"]\n\nInput: \"Completed 2 hours of meditation\"  \nOutput: [\"Meditation | 2 Hours\"]\n\nInput: \"Ate a healthy breakfast\"  \nOutput: [\"Breakfast | 1 Meal\"]\n\nInput: \"Wrote in journal\"  \nOutput: [\"Journaling | 1 Entry\"]\n\nInput: \"No habits today\"  \nOutput: [\"Other | 0\"]"
 }  

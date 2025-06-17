@@ -1,14 +1,304 @@
-import { StyleSheet } from 'react-native';
-
-import EditScreenInfo from '@/components/EditScreenInfo';
+import React, { useState } from 'react';
+import { StyleSheet, TextInput, TouchableOpacity, FlatList, Keyboard, Alert } from 'react-native';
 import { Text, View } from '@/components/Themed';
-import GlobalStyles from '@/constants/GlobalStyles';
+import GlobalStyles, { box } from '@/constants/GlobalStyles';
+import { useColorScheme } from '@/components/useColorScheme';
+import Constants from 'expo-constants';
+import settings from '../../settings.json';
+
+const GEMINI_API_KEY = Constants.expoConfig?.extra?.GEMINI_API_KEY;
+const OPENAI_API_KEY = Constants.expoConfig?.extra?.OPENAI_API_KEY;
+const PRESET_PROMPT = settings.aiPrompt;
+
+// Mock habit matcher
+function matchHabit(note: string) {
+  // Simulate matching with a 50% chance
+  return Math.random() > 0.5 ? { name: note, id: Math.random().toString() } : null;
+}
+// Mock habit creator
+function createHabit(note: string) {
+  return { name: note, id: Math.random().toString() };
+}
+
+// Helper to parse note string
+function parseNote(note: string) {
+  // Expect format: Habit Name | Number Unit
+  const match = note.match(/^(.+?)\s*\|\s*(\d+(?:\.\d+)?)\s*(\w+)?$/);
+  if (match) {
+    return { habit: match[1], number: match[2], unit: match[3] || '' };
+  } else {
+    // fallback: just show the note
+    return { habit: note, number: '', unit: '' };
+  }
+}
+
+// Mock: pretend these are registered habits
+const registeredHabits = ['Work', 'Water', 'Reading', 'Workout', 'Video Games'];
+function isHabitRegistered(habitName: string) {
+  return registeredHabits.includes(habitName);
+}
+function logHabit(habit: string, number: string, unit: string) {
+  Alert.alert('Log Habit', `Logged: ${habit} - ${number} ${unit}`);
+}
+function addHabit(habit: string) {
+  Alert.alert('Add Habit', `Suggest adding new habit: ${habit}`);
+}
 
 export default function AILogScreen() {
+  const colorScheme = useColorScheme() ?? 'light';
+  const [input, setInput] = useState('');
+  const [notes, setNotes] = useState<string[]>([]);
+  const [approved, setApproved] = useState<{ [note: string]: boolean }>({});
+  const [loading, setLoading] = useState(false);
+
+  const handleGenerate = async () => {
+    if (!input.trim()) return;
+    setLoading(true);
+    Keyboard.dismiss();
+    try {
+      // Try Gemini API first
+      let response, data;
+      if (GEMINI_API_KEY) {
+        response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + GEMINI_API_KEY, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: `${PRESET_PROMPT}\nUser input: ${input}` }] }],
+          }),
+        });
+        data = await response.json();
+        // Try to parse JSON from Gemini response
+        const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        const arr = JSON.parse(text.match(/\[.*\]/s)?.[0] || '[]');
+        setNotes(arr);
+      } else if (OPENAI_API_KEY) {
+        response = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${OPENAI_API_KEY}`,
+          },
+          body: JSON.stringify({
+            model: 'gpt-4.1-nano-2025-04-14',
+            messages: [
+              { role: 'system', content: PRESET_PROMPT },
+              { role: 'user', content: input },
+            ],
+            max_tokens: 256,
+          }),
+        });
+        data = await response.json();
+        const text = data.choices?.[0]?.message?.content || '';
+        const arr = JSON.parse(text.match(/\[.*\]/s)?.[0] || '[]');
+        setNotes(arr);
+      } else {
+        Alert.alert('No API Key', 'No AI API key found.');
+      }
+    } catch (e: any) {
+      Alert.alert('AI Error', e.message || 'Failed to generate notes.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleClear = () => {
+    setInput('');
+    setNotes([]);
+    setApproved({});
+  };
+
+  const handleApprove = (note: string) => {
+    setApproved((prev) => ({ ...prev, [note]: !prev[note] }));
+    // Mock habit matching/creation
+    let habit = matchHabit(note);
+    if (!habit) {
+      // Prompt to create new habit (mock)
+      Alert.alert('No matching habit', `Create new habit for: "${note}"?`, [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Create', onPress: () => createHabit(note) },
+      ]);
+    }
+  };
+
   return (
     <View style={GlobalStyles.container}>
-      <Text style={GlobalStyles.title}>AI-Log</Text>
-      {/* AI-Log UI will be implemented here */}
+      <Text style={styles.title}>AI Log</Text>
+      <View style={box(colorScheme)}>
+        <TextInput
+          style={[styles.input, { color: colorScheme === 'dark' ? '#fff' : '#181D17' }]}
+          placeholder="Enter your daily log or prompt..."
+          placeholderTextColor={colorScheme === 'dark' ? '#A6B5A1' : '#888' }
+          value={input}
+          onChangeText={setInput}
+          multiline
+          numberOfLines={4}
+          editable={!loading}
+        />
+      </View>
+      <View style={styles.buttonRow}>
+        <TouchableOpacity
+          style={[styles.button, styles.generate, loading && { opacity: 0.5 }]}
+          onPress={handleGenerate}
+          disabled={loading}
+        >
+          <Text style={styles.buttonText}>Generate Notes</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.button, styles.clear]} onPress={handleClear}>
+          <Text style={styles.buttonText}>Clear Notes</Text>
+        </TouchableOpacity>
+      </View>
+      <Text style={styles.sectionTitle}>Generated Notes</Text>
+      <View style={styles.tableContainer}>
+        <View style={styles.tableHeader}>
+          <Text style={[styles.tableCell, styles.headerCell, { textAlign: 'left' }, { flex: 2 }]}>Habit Name</Text>
+          <Text style={[styles.tableCell, styles.headerCell, { textAlign: 'left' }]}>Number</Text>
+          <Text style={[styles.tableCell, styles.headerCell, { textAlign: 'right' }]}>Unit</Text>
+          <Text style={[styles.tableCell, styles.headerCell, { textAlign: 'right' }, { minWidth: 32 }]}>Log</Text>
+        </View>
+        <FlatList
+          data={notes}
+          keyExtractor={(item) => item}
+          renderItem={({ item }) => {
+            const { habit, number, unit } = parseNote(item);
+            return (
+              <View style={styles.tableRow}>
+                <Text style={[styles.tableCell, { textAlign: 'left' }, { flex: 2 }]}>{habit}</Text>
+                <Text style={[styles.tableCell, { textAlign: 'left' }]}>{number}</Text>
+                <Text style={[styles.tableCell, { textAlign: 'left' }]}>{unit}</Text>
+                {isHabitRegistered(habit) ? (
+                  <TouchableOpacity onPress={() => logHabit(habit, number, unit)}>
+                    <Text style={styles.logButton}>Log</Text>
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity onPress={() => addHabit(habit)}>
+                    <Text style={styles.addButton}>Add</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            );
+          }}
+          ListEmptyComponent={<Text style={styles.emptyText}>No notes generated yet.</Text>}
+          style={{ marginHorizontal: 0 }}
+        />
+      </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  title: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginTop: 16,
+    marginBottom: 8,
+    color: '#fff',
+  },
+  input: {
+    minHeight: 80,
+    borderRadius: 12,
+    padding: 12,
+    fontSize: 16,
+    backgroundColor: 'rgba(166,181,161,0.08)',
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 12,
+    gap: 12,
+  },
+  button: {
+    borderRadius: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 22,
+    minWidth: 120,
+    alignItems: 'center',
+  },
+  generate: {
+    backgroundColor: '#5BE13A',
+  },
+  clear: {
+    backgroundColor: '#23281e',
+  },
+  buttonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  sectionTitle: {
+    fontWeight: 'bold',
+    fontSize: 18,
+    marginLeft: 16,
+    marginTop: 16,
+    marginBottom: 8,
+    color: '#fff',
+  },
+  tableContainer: {
+    marginHorizontal: 16,
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(166,181,161,0.04)',
+  },
+  tableHeader: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(166,181,161,0.10)',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderColor: 'rgba(166,181,161,0.15)',
+  },
+  tableRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    borderBottomWidth: 0.5,
+    borderColor: 'rgba(166,181,161,0.10)',
+  },
+  tableCell: {
+    flex: 1,
+    color: '#fff',
+    fontSize: 16,
+    paddingHorizontal: 4,
+  },
+  headerCell: {
+    fontWeight: 'bold',
+    color: '#A6B5A1',
+    fontSize: 15,
+  },
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: '#A6B5A1',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 12,
+    backgroundColor: 'transparent',
+  },
+  checkmark: {
+    color: '#5BE13A',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  emptyText: {
+    color: '#A6B5A1',
+    textAlign: 'center',
+    marginTop: 32,
+    fontSize: 16,
+  },
+  logButton: {
+    color: '#5BE13A',
+    fontWeight: 'bold',
+    textAlign: 'right',
+    fontSize: 15,
+    paddingHorizontal: 4,
+  },
+  addButton: {
+    color: '#A6B5A1',
+    fontWeight: 'bold',
+    textAlign: 'right',
+    fontSize: 15,
+    paddingHorizontal: 4,
+  },
+});
