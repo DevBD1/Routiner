@@ -9,6 +9,7 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import firebaseApp from '../firebaseConfig';
 import LoginScreen from './screens/LoginScreen';
 import { useColorScheme } from '@/components/useColorScheme';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 
 export {
@@ -64,9 +65,11 @@ export default function RootLayout() {
   }
 
   return (
-    <AuthContext.Provider value={{ user }}>
-      <RootLayoutNav />
-    </AuthContext.Provider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <AuthContext.Provider value={{ user }}>
+        <RootLayoutNav />
+      </AuthContext.Provider>
+    </GestureHandlerRootView>
   );
 }
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, TouchableOpacity, FlatList, View as RNView } from 'react-native';
+import { StyleSheet, TouchableOpacity, FlatList, View as RNView, Alert } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import GlobalStyles, { box } from '@/constants/GlobalStyles';
 import { useColorScheme } from '@/components/useColorScheme';
@@ -7,6 +7,7 @@ import { FontAwesome5 } from '@expo/vector-icons';
 import Colors from '@/constants/Colors';
 import * as SecureStore from 'expo-secure-store';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { Swipeable } from 'react-native-gesture-handler';
 
 type Habit = {
   id: string;
@@ -145,49 +146,67 @@ export default function HabitTrackerScreen() {
         keyExtractor={h => h.id}
         renderItem={({ item }) => {
           const isOpen = expanded === item.id;
-          return (
-            <View style={box(colorScheme)}>
-              <TouchableOpacity style={styles.habitRow} onPress={() => setExpanded(isOpen ? null : item.id)}>
-                <View style={[styles.iconBox, { backgroundColor: theme.button1 }]}>
-                  <FontAwesome5 name={item.icon} size={24} color={theme.tabIconDefault} />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={[styles.habitName, { color: theme.text }]}>{item.name}</Text>
-                  <Text style={[styles.habitTime, { color: theme.tabIconDefault }]}>{item.time}</Text>
-                </View>
-                <View style={[styles.progressMiniBarBg, { backgroundColor: theme.button1 }]}>
-                  <View style={[styles.progressMiniBar, { backgroundColor: theme.button2, width: `${Math.min(100, (item.progress / item.goal) * 100)}%` }]} />
-                </View>
-                <Text style={[styles.habitGoal, { color: theme.text }]}>{item.progress}</Text>
-                <TouchableOpacity
-                  style={[styles.checkbox, { borderColor: theme.tabIconDefault, backgroundColor: item.progress >= item.goal ? theme.button2 : 'transparent' }]}
-                  onPress={async () => {
-                    const updatedHabits = habits.map(h =>
-                      h.id === item.id
-                        ? { ...h, progress: h.progress >= h.goal ? 0 : h.goal }
-                        : h
-                    );
-                    setHabits(updatedHabits);
-                    await saveHabits(updatedHabits);
+          const renderRightActions = () => (
+            <TouchableOpacity
+              style={{ backgroundColor: 'red', justifyContent: 'center', alignItems: 'center', width: 80, height: '100%' }}
+              onPress={() => {
+                Alert.alert('Delete Habit', `Are you sure you want to delete "${item.name}"?`, [
+                  { text: 'Cancel', style: 'cancel' },
+                  { text: 'Delete', style: 'destructive', onPress: async () => {
+                    removeHabit(item.id);
+                    await saveHabits(habits.filter(h => h.id !== item.id));
                   }}
-                >
-                  {item.progress >= item.goal && (
-                    <FontAwesome5 name="check" size={16} color={theme.background} />
-                  )}
-                </TouchableOpacity>
-              </TouchableOpacity>
-              {isOpen && (
-                <View style={styles.habitDetails}>
-                  <Text style={[styles.detailText, { color: theme.tabIconDefault }]}><Text style={styles.detailLabel}>Notes:</Text> {item.notes}</Text>
-                  <Text style={[styles.detailText, { color: theme.tabIconDefault }]}><Text style={styles.detailLabel}>Goal:</Text> {item.goal} {item.unit}</Text>
-                  <Text style={[styles.detailText, { color: theme.tabIconDefault }]}><Text style={styles.detailLabel}>Progress:</Text> {item.progress} {item.unit}</Text>
-                  <Text style={[styles.detailText, { color: theme.tabIconDefault }]}><Text style={styles.detailLabel}>Repetition:</Text> {item.repetition}</Text>
-                  <TouchableOpacity style={styles.editIcon}>
-                    <FontAwesome5 name="edit" size={18} color={theme.tabIconDefault} />
+                ]);
+              }}
+            >
+              <FontAwesome5 name="trash" size={24} color="#fff" />
+            </TouchableOpacity>
+          );
+          return (
+            <Swipeable renderRightActions={renderRightActions}>
+              <View style={box(colorScheme)}>
+                <TouchableOpacity style={styles.habitRow} onPress={() => setExpanded(isOpen ? null : item.id)}>
+                  <View style={[styles.iconBox, { backgroundColor: theme.button1 }]}>
+                    <FontAwesome5 name={item.icon} size={24} color={theme.tabIconDefault} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.habitName, { color: theme.text }]}>{item.name}</Text>
+                    <Text style={[styles.habitTime, { color: theme.tabIconDefault }]}>{item.time}</Text>
+                  </View>
+                  <View style={[styles.progressMiniBarBg, { backgroundColor: theme.button1 }]}>
+                    <View style={[styles.progressMiniBar, { backgroundColor: theme.button2, width: `${Math.min(100, (item.progress / item.goal) * 100)}%` }]} />
+                  </View>
+                  <Text style={[styles.habitGoal, { color: theme.text }]}>{item.progress}</Text>
+                  <TouchableOpacity
+                    style={[styles.checkbox, { borderColor: theme.tabIconDefault, backgroundColor: item.progress >= item.goal ? theme.button2 : 'transparent' }]}
+                    onPress={async () => {
+                      const updatedHabits = habits.map(h =>
+                        h.id === item.id
+                          ? { ...h, progress: h.progress >= h.goal ? 0 : h.goal }
+                          : h
+                      );
+                      setHabits(updatedHabits);
+                      await saveHabits(updatedHabits);
+                    }}
+                  >
+                    {item.progress >= item.goal && (
+                      <FontAwesome5 name="check" size={16} color={theme.background} />
+                    )}
                   </TouchableOpacity>
-                </View>
-              )}
-            </View>
+                </TouchableOpacity>
+                {isOpen && (
+                  <View style={styles.habitDetails}>
+                    <Text style={[styles.detailText, { color: theme.text }]}><Text style={styles.detailLabel}>Notes:</Text> {item.notes}</Text>
+                    <Text style={[styles.detailText, { color: theme.text }]}><Text style={styles.detailLabel}>Goal:</Text> {item.goal} {item.unit}</Text>
+                    <Text style={[styles.detailText, { color: theme.text }]}><Text style={styles.detailLabel}>Progress:</Text> {item.progress} {item.unit}</Text>
+                    <Text style={[styles.detailText, { color: theme.text }]}><Text style={styles.detailLabel}>Repetition:</Text> {item.repetition}</Text>
+                    <TouchableOpacity style={styles.editIcon}>
+                      <FontAwesome5 name="edit" size={18} color={theme.tabIconDefault} />
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </View>
+            </Swipeable>
           );
         }}
         contentContainerStyle={{ paddingBottom: 32 }}
@@ -336,7 +355,6 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   detailLabel: {
-    color: '#fff',
     fontWeight: 'bold',
   },
   editIcon: {

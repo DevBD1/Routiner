@@ -7,6 +7,7 @@ import Constants from 'expo-constants';
 import settings from '../../settings.json';
 import * as SecureStore from 'expo-secure-store';
 import uuid from 'react-native-uuid';
+import Colors from '@/constants/Colors';
 
 const GEMINI_API_KEY = Constants.expoConfig?.extra?.GEMINI_API_KEY;
 const OPENAI_API_KEY = Constants.expoConfig?.extra?.OPENAI_API_KEY;
@@ -90,6 +91,7 @@ function convertToHabitUnit(value: number, fromUnit: string, toUnit: string): nu
 
 export default function AILogScreen() {
   const colorScheme = useColorScheme() ?? 'light';
+  const theme = Colors[colorScheme];
   const [input, setInput] = useState('');
   const [notes, setNotes] = useState<string[]>([]);
   const [approved, setApproved] = useState<{ [note: string]: boolean }>({});
@@ -237,7 +239,7 @@ export default function AILogScreen() {
           onPress={handleGenerate}
           disabled={loading}
         >
-          <Text style={styles.buttonText}>Generate Notes</Text>
+          <Text style={[styles.buttonText, { color: theme.text }]}>Generate Notes</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.button, styles.clear]} onPress={handleClear}>
           <Text style={styles.buttonText}>Clear Notes</Text>
@@ -288,7 +290,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 16,
     marginBottom: 8,
-    color: '#fff',
   },
   input: {
     minHeight: 80,
@@ -318,7 +319,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#23281e',
   },
   buttonText: {
-    color: '#fff',
     fontWeight: 'bold',
     fontSize: 16,
   },
@@ -328,7 +328,6 @@ const styles = StyleSheet.create({
     marginLeft: 16,
     marginTop: 16,
     marginBottom: 8,
-    color: '#fff',
   },
   tableContainer: {
     marginHorizontal: 16,
@@ -352,13 +351,12 @@ const styles = StyleSheet.create({
   },
   tableCell: {
     flex: 1,
-    color: '#fff',
     fontSize: 16,
     paddingHorizontal: 4,
   },
   headerCell: {
     fontWeight: 'bold',
-    color: '#A6B5A1',
+    //color: '#A6B5A1',
     fontSize: 15,
   },
   checkbox: {
@@ -373,25 +371,25 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   checkmark: {
-    color: '#5BE13A',
+    //color: '#5BE13A',
     fontSize: 18,
     fontWeight: 'bold',
   },
   emptyText: {
-    color: '#A6B5A1',
+    //color: '#A6B5A1',
     textAlign: 'center',
     marginTop: 32,
     fontSize: 16,
   },
   logButton: {
-    color: '#5BE13A',
+    //color: '#5BE13A',
     fontWeight: 'bold',
     textAlign: 'right',
     fontSize: 15,
     paddingHorizontal: 4,
   },
   addButton: {
-    color: '#A6B5A1',
+    //color: '#A6B5A1',
     fontWeight: 'bold',
     textAlign: 'right',
     fontSize: 15,
