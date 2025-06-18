@@ -8,6 +8,7 @@ import settings from '../../settings.json';
 import * as SecureStore from 'expo-secure-store';
 import uuid from 'react-native-uuid';
 import Colors from '@/constants/Colors';
+import { useFocusEffect } from '@react-navigation/native';
 
 const GEMINI_API_KEY = Constants.expoConfig?.extra?.GEMINI_API_KEY;
 const OPENAI_API_KEY = Constants.expoConfig?.extra?.OPENAI_API_KEY;
@@ -21,16 +22,6 @@ const STATIC_HABITS = [
 ];
 const habitsPrompt = `\n\nYou must only use the following preset habits for all operations.\nDynamic limitation habits (these can have a goal/number/unit): ${DYNAMIC_HABITS.join(', ')}.\nStatic habits (these do not have a goal/number/unit): ${STATIC_HABITS.join(', ')}.\nDo not allow custom habits. Use only these names exactly as given. Only allow goals for dynamic habits.`;
 const finalPrompt = basePrompt + habitsPrompt;
-
-// Mock habit matcher
-function matchHabit(note: string) {
-  // Simulate matching with a 50% chance
-  return Math.random() > 0.5 ? { name: note, id: Math.random().toString() } : null;
-}
-// Mock habit creator
-function createHabit(note: string) {
-  return { name: note, id: Math.random().toString() };
-}
 
 // Helper to parse note string
 function parseNote(note: string) {
@@ -47,9 +38,12 @@ function parseNote(note: string) {
 const HABITS_KEY = 'habits';
 async function loadHabits() {
   const data = await SecureStore.getItemAsync(HABITS_KEY);
-  return data ? JSON.parse(data) : [];
+  const habits = data ? JSON.parse(data) : [];
+  console.log('AI Log - Loaded habits:', habits.map((h: Habit) => h.name));
+  return habits;
 }
 async function saveHabits(habits: Habit[]) {
+  console.log('AI Log - Saving habits:', habits.map((h: Habit) => h.name));
   await SecureStore.setItemAsync(HABITS_KEY, JSON.stringify(habits));
 }
 
@@ -98,13 +92,23 @@ export default function AILogScreen() {
   const theme = Colors[colorScheme];
   const [input, setInput] = useState('');
   const [notes, setNotes] = useState<string[]>([]);
-  const [approved, setApproved] = useState<{ [note: string]: boolean }>({});
   const [loading, setLoading] = useState(false);
   const [habits, setHabits] = useState<Habit[]>([]);
+  const [loggedHabits, setLoggedHabits] = useState<Set<string>>(new Set());
 
-  useEffect(() => {
-    loadHabits().then(setHabits);
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      let isActive = true;
+      loadHabits().then(h => {
+        if (isActive) {
+          setHabits(h);
+        }
+      });
+      return () => {
+        isActive = false;
+      };
+    }, [])
+  );
 
   const handleGenerate = async () => {
     if (!input.trim()) return;
@@ -159,25 +163,40 @@ export default function AILogScreen() {
   const handleClear = () => {
     setInput('');
     setNotes([]);
-    setApproved({});
+    setLoggedHabits(new Set());
   };
 
-  const handleApprove = (note: string) => {
-    setApproved((prev) => ({ ...prev, [note]: !prev[note] }));
-    // Mock habit matching/creation
-    let habit = matchHabit(note);
-    if (!habit) {
-      // Prompt to create new habit (mock)
-      Alert.alert('No matching habit', `Create new habit for: "${note}"?`, [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Create', onPress: () => createHabit(note) },
-      ]);
+  // Helper to check if a habit should be shown today based on repetition
+  function shouldShowHabitToday(habit: Habit): boolean {
+    const repetition = habit.repetition.toLowerCase();
+    
+    if (repetition === 'daily' || repetition === 'everyday') {
+      return true;
     }
-  };
+    
+    if (repetition.includes('every')) {
+      // Parse "every X days" pattern
+      const match = repetition.match(/every\s+(\d+)\s+days?/i);
+      if (match) {
+        const interval = parseInt(match[1]);
+        
+        if (interval > 0) {
+          // Calculate days since a reference date (Jan 1, 2024)
+          const referenceDate = new Date('2024-01-01');
+          const today = new Date();
+          const daysSinceReference = Math.floor((today.getTime() - referenceDate.getTime()) / (1000 * 60 * 60 * 24));
+          return daysSinceReference % interval === 0;
+        }
+      }
+    }
+    
+    // Default to showing daily if pattern is not recognized
+    return true;
+  }
 
-  // Helper to check if a habit is registered
-  function isHabitRegistered(habitName: string) {
-    return habits.some((h: Habit) => h.name === habitName);
+  // Get habits that should be shown today
+  function getHabitsForToday(): Habit[] {
+    return habits.filter(habit => shouldShowHabitToday(habit));
   }
 
   // Add a new habit to storage
@@ -192,12 +211,12 @@ export default function AILogScreen() {
       unit: isDynamic ? '' : '',
       progress: {}, // Initialize as empty object
       notes: '',
-      repetition: 'None',
+      repetition: 'Everyday', // Default to everyday instead of None
     };
     const updated = [...habits, newHabit];
     await saveHabits(updated);
     setHabits(updated);
-    Alert.alert('Habit Added', `Added: ${habitName}`);
+    Alert.alert('Habit Added', `Added: ${habitName} with "Everyday" repetition`);
   }
 
   // Log progress for a habit
@@ -232,6 +251,10 @@ export default function AILogScreen() {
     });
     await saveHabits(updated);
     setHabits(updated);
+    
+    // Mark this habit as logged in the current session
+    setLoggedHabits(prev => new Set([...prev, habitName]));
+    
     Alert.alert('Habit Logged', `Logged: ${habitName}${isDynamic ? ` - ${number} ${unit}` : ''}`);
   }
 
@@ -263,6 +286,11 @@ export default function AILogScreen() {
         </TouchableOpacity>
       </View>
       <Text style={styles.sectionTitle}>Generated Notes</Text>
+      <View style={styles.summaryContainer}>
+        <Text style={styles.summaryText}>
+          Today's available habits: {getHabitsForToday().length} of {habits.length} total
+        </Text>
+      </View>
       <View style={styles.tableContainer}>
         <View style={styles.tableHeader}>
           <Text style={[styles.tableCell, styles.headerCell, { textAlign: 'left' }, { flex: 2 }]}>Habit Name</Text>
@@ -275,15 +303,28 @@ export default function AILogScreen() {
           keyExtractor={(item) => item}
           renderItem={({ item }) => {
             const { habit, number, unit } = parseNote(item);
+            const existingHabit = habits.find(h => h.name === habit);
+            const isRegistered = existingHabit !== undefined;
+            const shouldShowToday = existingHabit ? shouldShowHabitToday(existingHabit) : true;
+            const isLogged = loggedHabits.has(habit);
+            
             return (
               <View style={styles.tableRow}>
                 <Text style={[styles.tableCell, { textAlign: 'left' }, { flex: 2 }]}>{habit}</Text>
                 <Text style={[styles.tableCell, { textAlign: 'left' }]}>{number}</Text>
                 <Text style={[styles.tableCell, { textAlign: 'left' }]}>{unit}</Text>
-                {isHabitRegistered(habit) ? (
-                  <TouchableOpacity onPress={() => logHabit(habit, number, unit)}>
-                    <Text style={styles.logButton}>Log</Text>
-                  </TouchableOpacity>
+                {isRegistered ? (
+                  shouldShowToday ? (
+                    isLogged ? (
+                      <Text style={styles.loggedText}>Logged</Text>
+                    ) : (
+                      <TouchableOpacity onPress={() => logHabit(habit, number, unit)}>
+                        <Text style={styles.logButton}>Log</Text>
+                      </TouchableOpacity>
+                    )
+                  ) : (
+                    <Text style={styles.skippedText}>Skipped</Text>
+                  )
                 ) : (
                   <TouchableOpacity onPress={() => addHabit(habit)}>
                     <Text style={styles.addButton}>Add</Text>
@@ -411,5 +452,31 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     fontSize: 15,
     paddingHorizontal: 4,
+  },
+  loggedText: {
+    //color: '#A6B5A1',
+    fontWeight: 'bold',
+    textAlign: 'right',
+    fontSize: 15,
+    paddingHorizontal: 4,
+    textDecorationLine: 'line-through',
+  },
+  skippedText: {
+    //color: '#A6B5A1',
+    textAlign: 'right',
+    fontSize: 15,
+    paddingHorizontal: 4,
+  },
+  summaryContainer: {
+    marginHorizontal: 16,
+    marginTop: 8,
+    marginBottom: 16,
+    padding: 12,
+    borderRadius: 12,
+    backgroundColor: 'rgba(166,181,161,0.04)',
+  },
+  summaryText: {
+    fontWeight: 'bold',
+    fontSize: 16,
   },
 });

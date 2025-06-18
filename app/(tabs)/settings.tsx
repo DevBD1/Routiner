@@ -10,6 +10,7 @@ import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import i18n from '@/i18n';
 import Constants from 'expo-constants';
 import GlobalStyles, { box } from '@/constants/GlobalStyles';
+import * as SecureStore from 'expo-secure-store';
 
 const LANGUAGES = [
   { code: 'en', label: 'English' },
@@ -111,6 +112,49 @@ export default function SettingsScreen() {
         </View>
       </View>
 
+      {/* Data Management Section */}
+      <View style={box(colorScheme)}>
+        <Text style={[styles.sectionTitle, { color: theme.text }]}>{i18n.t('data_management') || 'Data Management'}</Text>
+        <TouchableOpacity 
+          style={[styles.clearButton, { backgroundColor: theme.button1 }]}
+          onPress={async () => {
+            try {
+              // Get current habits count
+              const habitsData = await SecureStore.getItemAsync('habits');
+              const habits = habitsData ? JSON.parse(habitsData) : [];
+              const habitCount = habits.length;
+              
+              Alert.alert(
+                'Clear All Habits',
+                `Are you sure you want to delete all ${habitCount} habits? This action cannot be undone.`,
+                [
+                  { text: 'Cancel', style: 'cancel' },
+                  { 
+                    text: 'Clear All', 
+                    style: 'destructive',
+                    onPress: async () => {
+                      try {
+                        await SecureStore.deleteItemAsync('habits');
+                        Alert.alert('Success', `All ${habitCount} habits have been cleared.`);
+                      } catch (error) {
+                        Alert.alert('Error', 'Failed to clear habits data.');
+                      }
+                    }
+                  }
+                ]
+              );
+            } catch (error) {
+              Alert.alert('Error', 'Failed to read habits data.');
+            }
+          }}
+        >
+          <FontAwesome5 name="trash" size={18} color={theme.text} style={{ marginRight: 8 }} />
+          <Text style={[styles.clearButtonText, { color: theme.text }]}>
+            {i18n.t('clear_all_habits') || 'Clear All Habits'}
+          </Text>
+        </TouchableOpacity>
+      </View>
+
       {/* App Info Panel */}
       <View style={box(colorScheme)}> 
         <Text style={[styles.infoTitle, { color: theme.text }]}>{i18n.t('app_info')}</Text>
@@ -210,5 +254,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textDecorationLine: 'underline',
     marginBottom: 4,
+  },
+  clearButton: {
+    padding: 12,
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  clearButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 }); 

@@ -24,12 +24,15 @@ type Habit = {
 const HABITS_KEY = 'habits';
 
 async function saveHabits(habits: Habit[]) {
+  console.log('Main Screen - Saving habits:', habits.map((h: Habit) => h.name));
   await SecureStore.setItemAsync(HABITS_KEY, JSON.stringify(habits));
 }
 
 async function loadHabits(): Promise<Habit[]> {
   const data = await SecureStore.getItemAsync(HABITS_KEY);
-  return data ? JSON.parse(data) : [];
+  const habits = data ? JSON.parse(data) : [];
+  console.log('Main Screen - Loaded habits:', habits.map((h: Habit) => h.name));
+  return habits;
 }
 
 function getDatesAroundToday() {

@@ -6,6 +6,8 @@
     "logout": "Log out",
     "logged_out_message": "You have been logged out.",
     "app_info": "App Info",
+    "data_management": "Data Management",
+    "clear_all_habits": "Clear All Habits",
     "version": "Version",
     "developer": "Developer",
     "terms_of_usage": "Terms of Usage",
