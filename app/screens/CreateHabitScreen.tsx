@@ -7,6 +7,8 @@ import GlobalStyles, { box } from '@/constants/GlobalStyles';
 import { useNavigation } from '@react-navigation/native';
 import * as SecureStore from 'expo-secure-store';
 import uuid from 'react-native-uuid';
+import i18n from '@/i18n';
+import { Picker } from '@react-native-picker/picker';
 
 const UNITS = ['liter', 'meter', 'minute', 'hour', 'page', 'glass', 'session', 'entry'];
 const REPEAT_PATTERNS = [
@@ -69,16 +71,16 @@ export default function CreateHabitScreen() {
 
   const handleSave = async () => {
     if (!selectedHabit.trim()) {
-      Alert.alert('Validation', 'Please select a habit.');
+      Alert.alert(i18n.t('validation'), i18n.t('please_select_habit'));
       return;
     }
     if (!repeatPattern || repeatPattern === 'None') {
-      Alert.alert('Validation', 'Please select a repetition pattern.');
+      Alert.alert(i18n.t('validation'), i18n.t('please_select_repetition'));
       return;
     }
     let goal = goalOn ? parseInt(goalValue) : 1;
     if (goalOn && (!goalValue || isNaN(goal))) {
-      Alert.alert('Validation', 'Please enter a valid goal value.');
+      Alert.alert(i18n.t('validation'), i18n.t('please_enter_goal'));
       return;
     }
     setSaving(true);
@@ -98,13 +100,13 @@ export default function CreateHabitScreen() {
       await saveHabits([...habits, newHabit]);
       setSaving(false);
       console.log('Showing success alert and navigating back');
-      Alert.alert('Habit Created', 'Your habit has been added.', [
-        { text: 'OK', onPress: () => navigation.goBack() }
+      Alert.alert(i18n.t('habit_created'), i18n.t('habit_added'), [
+        { text: i18n.t('ok'), onPress: () => navigation.goBack() }
       ]);
     } catch (error) {
       setSaving(false);
       console.error('Error saving habit:', error);
-      Alert.alert('Error', error instanceof Error ? error.message : String(error));
+      Alert.alert(i18n.t('error'), error instanceof Error ? error.message : String(error));
     }
   };
 
@@ -113,7 +115,7 @@ export default function CreateHabitScreen() {
       <TouchableOpacity style={{ marginLeft: 16, marginTop: 50 }} onPress={() => navigation.goBack()}>
         <Text style={{ color: theme.text, fontSize: 28 }}>{'←'}</Text>
       </TouchableOpacity>
-      <Text style={[styles.title, { color: theme.text }]}>Create a new habit</Text>
+      <Text style={[styles.title, { color: theme.text }]}>{i18n.t('create_new_habit')}</Text>
       <View style={box(colorScheme)}>
         <Picker
           selectedValue={selectedHabit}
@@ -138,7 +140,7 @@ export default function CreateHabitScreen() {
         </Picker>
         <TextInput
           style={[styles.textarea, { color: theme.text }]}
-          placeholder="Notes"
+          placeholder={i18n.t('notes')}
           placeholderTextColor={theme.tabIconDefault}
           value={notes}
           onChangeText={setNotes}
@@ -146,17 +148,17 @@ export default function CreateHabitScreen() {
         />
       </View>
       {selectedHabitType === 'dynamic' && (
-        <>
-          <Text style={[styles.label, { color: theme.text }]}>Goal</Text>
+        <View>
+          <Text style={[styles.label, { color: theme.text }]}>{i18n.t('goal')}</Text>
           <View style={[box(colorScheme), { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }]}> 
-            <Text style={{ color: theme.text }}>Goal</Text>
+            <Text style={{ color: theme.text }}>{i18n.t('goal_toggle')}</Text>
             <Switch value={goalOn} onValueChange={setGoalOn} thumbColor={goalOn ? theme.button2 : theme.button1} trackColor={{ true: theme.button1, false: theme.button1 }} />
           </View>
           {goalOn && (
             <View style={box(colorScheme)}>
               <TextInput
                 style={[styles.input, { color: theme.text }]}
-                placeholder="Value"
+                placeholder={i18n.t('value')}
                 placeholderTextColor={theme.tabIconDefault}
                 value={goalValue}
                 onChangeText={setGoalValue}
@@ -178,15 +180,15 @@ export default function CreateHabitScreen() {
                     style={[styles.goalTypeButton, goalType === type && { backgroundColor: theme.button1 }]}
                     onPress={() => setGoalType(type)}
                   >
-                    <Text style={{ color: theme.text, fontWeight: goalType === type ? 'bold' : 'normal' }}>{type.charAt(0).toUpperCase() + type.slice(1)}</Text>
+                    <Text style={{ color: theme.text, fontWeight: goalType === type ? 'bold' : 'normal' }}>{i18n.t(type)}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
             </View>
           )}
-        </>
+        </View>
       )}
-      <Text style={[styles.label, { color: theme.text }]}>Repeat *</Text>
+      <Text style={[styles.label, { color: theme.text }]}>{i18n.t('repeat')} *</Text>
       <View style={box(colorScheme)}>
         <View style={styles.pickerRow}>
           <Picker
@@ -206,14 +208,12 @@ export default function CreateHabitScreen() {
         {saving ? (
           <ActivityIndicator color={theme.background} />
         ) : (
-          <Text style={[styles.saveButtonText, { color: theme.background }]}>Save Habit</Text>
+          <Text style={[styles.saveButtonText, { color: theme.background }]}>{i18n.t('save_habit')}</Text>
         )}
       </TouchableOpacity>
     </ScrollView>
   );
 }
-
-import { Picker } from '@react-native-picker/picker';
 
 const styles = StyleSheet.create({
   container: {

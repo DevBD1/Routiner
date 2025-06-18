@@ -8,6 +8,7 @@ import Colors from '@/constants/Colors';
 import * as SecureStore from 'expo-secure-store';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Swipeable } from 'react-native-gesture-handler';
+import i18n from '@/i18n';
 
 type Habit = {
   id: string;
@@ -24,14 +25,12 @@ type Habit = {
 const HABITS_KEY = 'habits';
 
 async function saveHabits(habits: Habit[]) {
-  console.log('Main Screen - Saving habits:', habits.map((h: Habit) => h.name));
   await SecureStore.setItemAsync(HABITS_KEY, JSON.stringify(habits));
 }
 
 async function loadHabits(): Promise<Habit[]> {
   const data = await SecureStore.getItemAsync(HABITS_KEY);
   const habits = data ? JSON.parse(data) : [];
-  console.log('Main Screen - Loaded habits:', habits.map((h: Habit) => h.name));
   return habits;
 }
 
@@ -126,7 +125,7 @@ export default function HabitTrackerScreen() {
   const total = habitsForSelectedDate.length;
   const progress = total ? completed / total : 0;
 
-  if (loading) return <Text>Loading...</Text>;
+  if (loading) return <Text>{i18n.t('loading')}</Text>;
 
   return (
     <View style={[GlobalStyles.container, { backgroundColor: theme.background }]}>
@@ -167,16 +166,16 @@ export default function HabitTrackerScreen() {
       />
       {/* Progress Bar */}
       <View style={styles.progressBox}>
-        <Text style={[styles.progressLabel, { color: theme.tabIconDefault }]}>Daily Progress</Text>
+        <Text style={[styles.progressLabel, { color: theme.tabIconDefault }]}>{i18n.t('daily_progress')}</Text>
         <View style={[styles.progressBarBg, { backgroundColor: theme.button1 }]}>
           <View style={[styles.progressBar, { backgroundColor: theme.button2, width: `${progress * 100}%` }]} />
         </View>
-        <Text style={[styles.progressText, { color: theme.tabIconDefault }]}>{completed}/{total} habits completed</Text>
+        <Text style={[styles.progressText, { color: theme.tabIconDefault }]}>{completed}/{total} {i18n.t('habits_completed')}</Text>
       </View>
       {/* Habits List */}
       <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 16, marginTop: 16, marginBottom: 8 }}>
         <Text style={[styles.sectionTitle, { color: theme.text, flex: 1 }]}>
-          {selectedDateIdx === 3 ? "Today's Habits" : `${selectedDate.toLocaleDateString()} Habits`}
+          {selectedDateIdx === 3 ? i18n.t('todays_habits') : `${selectedDate.toLocaleDateString()} ${i18n.t('habits')}`}
         </Text>
         <TouchableOpacity onPress={() => navigation.navigate('create_nav' as never)} style={{ marginRight: 16 }}>
           <FontAwesome5 name="plus" size={22} color={theme.button2} />
@@ -191,9 +190,9 @@ export default function HabitTrackerScreen() {
             <TouchableOpacity
               style={{ backgroundColor: 'red', justifyContent: 'center', alignItems: 'center', width: 80, height: '100%' }}
               onPress={() => {
-                Alert.alert('Delete Habit', `Are you sure you want to delete "${item.name}"?`, [
-                  { text: 'Cancel', style: 'cancel' },
-                  { text: 'Delete', style: 'destructive', onPress: async () => {
+                Alert.alert(i18n.t('delete_habit'), `${i18n.t('delete_habit_confirm')} "${item.name}"?`, [
+                  { text: i18n.t('cancel'), style: 'cancel' },
+                  { text: i18n.t('delete'), style: 'destructive', onPress: async () => {
                     removeHabit(item.id);
                     await saveHabits(habits.filter(h => h.id !== item.id));
                   }}
@@ -244,10 +243,10 @@ export default function HabitTrackerScreen() {
                 </TouchableOpacity>
                 {isOpen && (
                   <View style={styles.habitDetails}>
-                    <Text style={[styles.detailText, { color: theme.text }]}><Text style={styles.detailLabel}>Notes:</Text> {item.notes}</Text>
-                    <Text style={[styles.detailText, { color: theme.text }]}><Text style={styles.detailLabel}>Goal:</Text> {item.goal} {item.unit}</Text>
-                    <Text style={[styles.detailText, { color: theme.text }]}><Text style={styles.detailLabel}>Progress:</Text> {item.progress[selectedDateStr] || 0} {item.unit}</Text>
-                    <Text style={[styles.detailText, { color: theme.text }]}><Text style={styles.detailLabel}>Repetition:</Text> {item.repetition}</Text>
+                    <Text style={[styles.detailText, { color: theme.text }]}><Text style={styles.detailLabel}>{i18n.t('notes')}:</Text> {item.notes}</Text>
+                    <Text style={[styles.detailText, { color: theme.text }]}><Text style={styles.detailLabel}>{i18n.t('goal')}:</Text> {item.goal} {item.unit}</Text>
+                    <Text style={[styles.detailText, { color: theme.text }]}><Text style={styles.detailLabel}>{i18n.t('progress')}:</Text> {item.progress[selectedDateStr] || 0} {item.unit}</Text>
+                    <Text style={[styles.detailText, { color: theme.text }]}><Text style={styles.detailLabel}>{i18n.t('repetition')}:</Text> {item.repetition}</Text>
                     <TouchableOpacity style={styles.editIcon}>
                       <FontAwesome5 name="edit" size={18} color={theme.tabIconDefault} />
                     </TouchableOpacity>
