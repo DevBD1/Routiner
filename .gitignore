@@ -6,8 +6,8 @@ ios/
 .archive
 .routiner/
 
-google-services.json
-GoogleService-Info.plist
+#google-services.json
+#GoogleService-Info.plist
 
 # dependencies
 node_modules/
