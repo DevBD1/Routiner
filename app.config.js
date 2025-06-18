@@ -1,10 +1,4 @@
 import 'dotenv/config';
-import { existsSync } from 'fs';
-import { join } from 'path';
-
-// Check if Google Services files exist
-const googleServicesJsonExists = existsSync(join(__dirname, 'google-services.json'));
-const googleServiceInfoPlistExists = existsSync(join(__dirname, 'GoogleService-Info.plist'));
 
 export default {
   expo: {
@@ -18,7 +12,7 @@ export default {
     ios: {
       supportsTablet: true,
       bundleIdentifier: "com.devbd1.routiner",
-      ...(googleServiceInfoPlistExists && { googleServicesFile: "./GoogleService-Info.plist" }),
+      googleServicesFile: "./GoogleService-Info.plist",
       infoPlist: {
         "ITSAppUsesNonExemptEncryption": false,
         CFBundleURLTypes: [
@@ -36,7 +30,7 @@ export default {
         backgroundColor: "#ffffff"
       },
       package: "com.devbd1.routiner",
-      ...(googleServicesJsonExists && { googleServicesFile: "./google-services.json" })
+      googleServicesFile: "./google-services.json"
     },
     web: {
       bundler: "metro",
