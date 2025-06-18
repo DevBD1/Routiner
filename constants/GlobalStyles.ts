@@ -4,8 +4,8 @@ import Colors from './Colors';
 const GlobalStyles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'stretch',
-    justifyContent: 'flex-start',
+    // alignItems: 'stretch',
+    // justifyContent: 'flex-start',
     //backgroundColor: Colors.light.background,
   },
   title: {

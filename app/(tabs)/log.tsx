@@ -1,14 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, TextInput, TouchableOpacity, FlatList, Keyboard, Alert } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import GlobalStyles, { box } from '@/constants/GlobalStyles';
 import { useColorScheme } from '@/components/useColorScheme';
 import Constants from 'expo-constants';
 import settings from '../../settings.json';
+import * as SecureStore from 'expo-secure-store';
+import uuid from 'react-native-uuid';
 
 const GEMINI_API_KEY = Constants.expoConfig?.extra?.GEMINI_API_KEY;
 const OPENAI_API_KEY = Constants.expoConfig?.extra?.OPENAI_API_KEY;
-const PRESET_PROMPT = settings.aiPrompt;
+const basePrompt = settings.aiPrompt;
+const DYNAMIC_HABITS = [
+  'Video Games', 'Drink Water', 'Read', 'Take a Course', 'Study', 'Watch Media'
+];
+const STATIC_HABITS = [
+  'Make your bed', 'Clean the house', 'Clean the dishes', 'Pay the bills',
+  'Meditate', 'Pray', 'Cook a meal', 'Practice Yoga', 'Go to the gym', 'Take a shower'
+];
+const habitsPrompt = `\n\nYou must only use the following preset habits for all operations.\nDynamic limitation habits (these can have a goal/number/unit): ${DYNAMIC_HABITS.join(', ')}.\nStatic habits (these do not have a goal/number/unit): ${STATIC_HABITS.join(', ')}.\nDo not allow custom habits. Use only these names exactly as given. Only allow goals for dynamic habits.`;
+const finalPrompt = basePrompt + habitsPrompt;
 
 // Mock habit matcher
 function matchHabit(note: string) {
@@ -32,16 +43,49 @@ function parseNote(note: string) {
   }
 }
 
-// Mock: pretend these are registered habits
-const registeredHabits = ['Work', 'Water', 'Reading', 'Workout', 'Video Games'];
-function isHabitRegistered(habitName: string) {
-  return registeredHabits.includes(habitName);
+const HABITS_KEY = 'habits';
+async function loadHabits() {
+  const data = await SecureStore.getItemAsync(HABITS_KEY);
+  return data ? JSON.parse(data) : [];
 }
-function logHabit(habit: string, number: string, unit: string) {
-  Alert.alert('Log Habit', `Logged: ${habit} - ${number} ${unit}`);
+async function saveHabits(habits: Habit[]) {
+  await SecureStore.setItemAsync(HABITS_KEY, JSON.stringify(habits));
 }
-function addHabit(habit: string) {
-  Alert.alert('Add Habit', `Suggest adding new habit: ${habit}`);
+
+type Habit = {
+  id: string;
+  name: string;
+  icon: string;
+  time: string;
+  goal: number;
+  unit: string;
+  progress: number;
+  notes: string;
+  repetition: string;
+};
+
+// Conversion utility
+function convertToHabitUnit(value: number, fromUnit: string, toUnit: string): number {
+  const normalize = (u: string) => u.trim().toLowerCase();
+  fromUnit = normalize(fromUnit);
+  toUnit = normalize(toUnit);
+  if (fromUnit === toUnit) return value;
+  // Time conversions
+  if ((fromUnit === 'minutes' || fromUnit === 'minute') && (toUnit === 'hours' || toUnit === 'hour')) {
+    return value / 60;
+  }
+  if ((fromUnit === 'hours' || fromUnit === 'hour') && (toUnit === 'minutes' || toUnit === 'minute')) {
+    return value * 60;
+  }
+  // Volume conversions
+  if ((fromUnit === 'ml' || fromUnit === 'milliliter' || fromUnit === 'milliliters') && (toUnit === 'liter' || toUnit === 'liters')) {
+    return value / 1000;
+  }
+  if ((fromUnit === 'liter' || fromUnit === 'liters') && (toUnit === 'ml' || toUnit === 'milliliter' || toUnit === 'milliliters')) {
+    return value * 1000;
+  }
+  // Pages, sessions, entries, etc. (no conversion needed)
+  return value;
 }
 
 export default function AILogScreen() {
@@ -50,6 +94,11 @@ export default function AILogScreen() {
   const [notes, setNotes] = useState<string[]>([]);
   const [approved, setApproved] = useState<{ [note: string]: boolean }>({});
   const [loading, setLoading] = useState(false);
+  const [habits, setHabits] = useState<Habit[]>([]);
+
+  useEffect(() => {
+    loadHabits().then(setHabits);
+  }, []);
 
   const handleGenerate = async () => {
     if (!input.trim()) return;
@@ -63,7 +112,7 @@ export default function AILogScreen() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            contents: [{ parts: [{ text: `${PRESET_PROMPT}\nUser input: ${input}` }] }],
+            contents: [{ parts: [{ text: `${finalPrompt}\nUser input: ${input}` }] }],
           }),
         });
         data = await response.json();
@@ -81,7 +130,7 @@ export default function AILogScreen() {
           body: JSON.stringify({
             model: 'gpt-4.1-nano-2025-04-14',
             messages: [
-              { role: 'system', content: PRESET_PROMPT },
+              { role: 'system', content: finalPrompt },
               { role: 'user', content: input },
             ],
             max_tokens: 256,
@@ -119,6 +168,53 @@ export default function AILogScreen() {
       ]);
     }
   };
+
+  // Helper to check if a habit is registered
+  function isHabitRegistered(habitName: string) {
+    return habits.some((h: Habit) => h.name === habitName);
+  }
+
+  // Add a new habit to storage
+  async function addHabit(habitName: string) {
+    const isDynamic = DYNAMIC_HABITS.includes(habitName);
+    const newHabit: Habit = {
+      id: uuid.v4() as string,
+      name: habitName,
+      icon: 'circle',
+      time: '',
+      goal: isDynamic ? 1 : 1,
+      unit: isDynamic ? '' : '',
+      progress: 0,
+      notes: '',
+      repetition: 'None',
+    };
+    const updated = [...habits, newHabit];
+    await saveHabits(updated);
+    setHabits(updated);
+    Alert.alert('Habit Added', `Added: ${habitName}`);
+  }
+
+  // Log progress for a habit
+  async function logHabit(habitName: string, number: string, unit: string) {
+    const isDynamic = DYNAMIC_HABITS.includes(habitName);
+    const updated = habits.map((h: Habit) => {
+      if (h.name === habitName) {
+        if (isDynamic) {
+          let progress = Number(number);
+          if (h.unit && unit && h.unit.toLowerCase() !== unit.toLowerCase()) {
+            progress = convertToHabitUnit(progress, unit, h.unit);
+          }
+          return { ...h, progress };
+        } else {
+          return { ...h, progress: 1 };
+        }
+      }
+      return h;
+    });
+    await saveHabits(updated);
+    setHabits(updated);
+    Alert.alert('Habit Logged', `Logged: ${habitName}${isDynamic ? ` - ${number} ${unit}` : ''}`);
+  }
 
   return (
     <View style={GlobalStyles.container}>

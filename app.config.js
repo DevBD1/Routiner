@@ -39,6 +39,7 @@ export default {
     },
     plugins: [
       'expo-localization',
+      'expo-secure-store',
     ],
     extra: {
       eas: {
