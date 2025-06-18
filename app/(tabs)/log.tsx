@@ -60,7 +60,7 @@ type Habit = {
   time: string;
   goal: number;
   unit: string;
-  progress: number;
+  progress: { [date: string]: number };
   notes: string;
   repetition: string;
 };
@@ -87,6 +87,10 @@ function convertToHabitUnit(value: number, fromUnit: string, toUnit: string): nu
   }
   // Pages, sessions, entries, etc. (no conversion needed)
   return value;
+}
+
+function formatDate(date: Date): string {
+  return date.toISOString().split('T')[0];
 }
 
 export default function AILogScreen() {
@@ -186,7 +190,7 @@ export default function AILogScreen() {
       time: '',
       goal: isDynamic ? 1 : 1,
       unit: isDynamic ? '' : '',
-      progress: 0,
+      progress: {}, // Initialize as empty object
       notes: '',
       repetition: 'None',
     };
@@ -199,6 +203,7 @@ export default function AILogScreen() {
   // Log progress for a habit
   async function logHabit(habitName: string, number: string, unit: string) {
     const isDynamic = DYNAMIC_HABITS.includes(habitName);
+    const today = formatDate(new Date());
     const updated = habits.map((h: Habit) => {
       if (h.name === habitName) {
         if (isDynamic) {
@@ -206,9 +211,21 @@ export default function AILogScreen() {
           if (h.unit && unit && h.unit.toLowerCase() !== unit.toLowerCase()) {
             progress = convertToHabitUnit(progress, unit, h.unit);
           }
-          return { ...h, progress };
+          return { 
+            ...h, 
+            progress: { 
+              ...h.progress, 
+              [today]: progress 
+            }
+          };
         } else {
-          return { ...h, progress: 1 };
+          return { 
+            ...h, 
+            progress: { 
+              ...h.progress, 
+              [today]: 1 
+            }
+          };
         }
       }
       return h;

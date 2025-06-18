@@ -12,6 +12,7 @@ const UNITS = ['liter', 'meter', 'minute', 'hour', 'page', 'glass', 'session', '
 const REPEAT_PATTERNS = [
   'Everyday',
   'Every 2 days',
+  'Every 3 days',
   'Every Monday',
   'Every Tuesday and Wednesday',
   'Once a week',
@@ -63,13 +64,16 @@ export default function CreateHabitScreen() {
   const [goalValue, setGoalValue] = useState('');
   const [goalUnit, setGoalUnit] = useState(UNITS[0]);
   const [goalType, setGoalType] = useState<'minimum' | 'maximum' | 'precise'>('precise');
-  const [repeatOn, setRepeatOn] = useState(true);
   const [repeatPattern, setRepeatPattern] = useState(REPEAT_PATTERNS[0]);
   const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
     if (!selectedHabit.trim()) {
       Alert.alert('Validation', 'Please select a habit.');
+      return;
+    }
+    if (!repeatPattern || repeatPattern === 'None') {
+      Alert.alert('Validation', 'Please select a repetition pattern.');
       return;
     }
     let goal = goalOn ? parseInt(goalValue) : 1;
@@ -86,9 +90,9 @@ export default function CreateHabitScreen() {
         time: '',
         goal: selectedHabitType === 'dynamic' ? (goalOn ? parseInt(goalValue) : 1) : 1,
         unit: selectedHabitType === 'dynamic' && goalOn ? goalUnit : '',
-        progress: 0,
+        progress: {}, // Initialize as empty object for date-based progress
         notes,
-        repetition: repeatOn ? repeatPattern : 'None',
+        repetition: repeatPattern,
       };
       const habits = await loadHabits();
       await saveHabits([...habits, newHabit]);
@@ -182,24 +186,18 @@ export default function CreateHabitScreen() {
           )}
         </>
       )}
-      <Text style={[styles.label, { color: theme.text }]}>Repeat</Text>
-      <View style={[box(colorScheme), { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }]}> 
-        <Text style={{ color: theme.text }}>Repeat</Text>
-        <Switch value={repeatOn} onValueChange={setRepeatOn} thumbColor={repeatOn ? theme.button2 : theme.button1} trackColor={{ true: theme.button1, false: theme.button1 }} />
-      </View>
-      {repeatOn && (
-        <View style={box(colorScheme)}>
-          <View style={styles.pickerRow}>
-            <Picker
-              selectedValue={repeatPattern}
-              style={[styles.picker, { color: theme.text }]}
-              onValueChange={setRepeatPattern}
-            >
-              {REPEAT_PATTERNS.map(r => <Picker.Item key={r} label={r} value={r} />)}
-            </Picker>
-          </View>
+      <Text style={[styles.label, { color: theme.text }]}>Repeat *</Text>
+      <View style={box(colorScheme)}>
+        <View style={styles.pickerRow}>
+          <Picker
+            selectedValue={repeatPattern}
+            style={[styles.picker, { color: theme.text }]}
+            onValueChange={setRepeatPattern}
+          >
+            {REPEAT_PATTERNS.map(r => <Picker.Item key={r} label={r} value={r} />)}
+          </Picker>
         </View>
-      )}
+      </View>
       <TouchableOpacity
         style={[styles.saveButton, { backgroundColor: theme.button2, opacity: saving ? 0.6 : 1 }]}
         onPress={handleSave}

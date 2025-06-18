@@ -16,7 +16,7 @@ type Habit = {
   time: string;
   goal: number;
   unit: string;
-  progress: number;
+  progress: { [date: string]: number };
   notes: string;
   repetition: string;
 };
@@ -41,6 +41,36 @@ function getDatesAroundToday() {
   });
 }
 
+function formatDate(date: Date): string {
+  return date.toISOString().split('T')[0];
+}
+
+function shouldShowHabitOnDate(habit: Habit, date: Date): boolean {
+  const repetition = habit.repetition.toLowerCase();
+  
+  if (repetition === 'daily' || repetition === 'everyday') {
+    return true;
+  }
+  
+  if (repetition.includes('every')) {
+    // Parse "every X days" pattern
+    const match = repetition.match(/every\s+(\d+)\s+days?/i);
+    if (match) {
+      const interval = parseInt(match[1]);
+      
+      if (interval > 0) {
+        // Calculate days since a reference date (Jan 1, 2024)
+        const referenceDate = new Date('2024-01-01');
+        const daysSinceReference = Math.floor((date.getTime() - referenceDate.getTime()) / (1000 * 60 * 60 * 24));
+        return daysSinceReference % interval === 0;
+      }
+    }
+  }
+  
+  // Default to showing daily if pattern is not recognized
+  return true;
+}
+
 export default function HabitTrackerScreen() {
   const colorScheme = useColorScheme() ?? 'light';
   const theme = Colors[colorScheme];
@@ -50,6 +80,12 @@ export default function HabitTrackerScreen() {
   const dates = getDatesAroundToday();
   const [habits, setHabits] = useState<Habit[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const selectedDate = dates[selectedDateIdx];
+  const selectedDateStr = formatDate(selectedDate);
+
+  // Filter habits to only show those scheduled for the selected date
+  const habitsForSelectedDate = habits.filter(habit => shouldShowHabitOnDate(habit, selectedDate));
 
   useFocusEffect(
     React.useCallback(() => {
@@ -83,8 +119,8 @@ export default function HabitTrackerScreen() {
     setHabits(prev => prev.filter(h => h.id !== id));
   }
 
-  const completed = habits.filter(h => h.progress > 0).length;
-  const total = habits.length;
+  const completed = habitsForSelectedDate.filter(h => (h.progress[selectedDateStr] || 0) > 0).length;
+  const total = habitsForSelectedDate.length;
   const progress = total ? completed / total : 0;
 
   if (loading) return <Text>Loading...</Text>;
@@ -136,13 +172,15 @@ export default function HabitTrackerScreen() {
       </View>
       {/* Habits List */}
       <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 16, marginTop: 16, marginBottom: 8 }}>
-        <Text style={[styles.sectionTitle, { color: theme.text, flex: 1 }]}>Today's Habits</Text>
+        <Text style={[styles.sectionTitle, { color: theme.text, flex: 1 }]}>
+          {selectedDateIdx === 3 ? "Today's Habits" : `${selectedDate.toLocaleDateString()} Habits`}
+        </Text>
         <TouchableOpacity onPress={() => navigation.navigate('create_nav' as never)} style={{ marginRight: 16 }}>
           <FontAwesome5 name="plus" size={22} color={theme.button2} />
         </TouchableOpacity>
       </View>
       <FlatList
-        data={habits}
+        data={habitsForSelectedDate}
         keyExtractor={h => h.id}
         renderItem={({ item }) => {
           const isOpen = expanded === item.id;
@@ -174,22 +212,29 @@ export default function HabitTrackerScreen() {
                     <Text style={[styles.habitTime, { color: theme.tabIconDefault }]}>{item.time}</Text>
                   </View>
                   <View style={[styles.progressMiniBarBg, { backgroundColor: theme.button1 }]}>
-                    <View style={[styles.progressMiniBar, { backgroundColor: theme.button2, width: `${Math.min(100, (item.progress / item.goal) * 100)}%` }]} />
+                    <View style={[styles.progressMiniBar, { backgroundColor: theme.button2, width: `${Math.min(100, ((item.progress[selectedDateStr] || 0) / item.goal) * 100)}%` }]} />
                   </View>
-                  <Text style={[styles.habitGoal, { color: theme.text }]}>{item.progress}</Text>
+                  <Text style={[styles.habitGoal, { color: theme.text }]}>{item.progress[selectedDateStr] || 0}</Text>
                   <TouchableOpacity
-                    style={[styles.checkbox, { borderColor: theme.tabIconDefault, backgroundColor: item.progress >= item.goal ? theme.button2 : 'transparent' }]}
+                    style={[styles.checkbox, { borderColor: theme.tabIconDefault, backgroundColor: (item.progress[selectedDateStr] || 0) >= item.goal ? theme.button2 : 'transparent' }]}
                     onPress={async () => {
+                      const currentProgress = item.progress[selectedDateStr] || 0;
                       const updatedHabits = habits.map(h =>
                         h.id === item.id
-                          ? { ...h, progress: h.progress >= h.goal ? 0 : h.goal }
+                          ? { 
+                              ...h, 
+                              progress: { 
+                                ...h.progress, 
+                                [selectedDateStr]: currentProgress >= h.goal ? 0 : h.goal 
+                              }
+                            }
                           : h
                       );
                       setHabits(updatedHabits);
                       await saveHabits(updatedHabits);
                     }}
                   >
-                    {item.progress >= item.goal && (
+                    {(item.progress[selectedDateStr] || 0) >= item.goal && (
                       <FontAwesome5 name="check" size={16} color={theme.background} />
                     )}
                   </TouchableOpacity>
@@ -198,7 +243,7 @@ export default function HabitTrackerScreen() {
                   <View style={styles.habitDetails}>
                     <Text style={[styles.detailText, { color: theme.text }]}><Text style={styles.detailLabel}>Notes:</Text> {item.notes}</Text>
                     <Text style={[styles.detailText, { color: theme.text }]}><Text style={styles.detailLabel}>Goal:</Text> {item.goal} {item.unit}</Text>
-                    <Text style={[styles.detailText, { color: theme.text }]}><Text style={styles.detailLabel}>Progress:</Text> {item.progress} {item.unit}</Text>
+                    <Text style={[styles.detailText, { color: theme.text }]}><Text style={styles.detailLabel}>Progress:</Text> {item.progress[selectedDateStr] || 0} {item.unit}</Text>
                     <Text style={[styles.detailText, { color: theme.text }]}><Text style={styles.detailLabel}>Repetition:</Text> {item.repetition}</Text>
                     <TouchableOpacity style={styles.editIcon}>
                       <FontAwesome5 name="edit" size={18} color={theme.tabIconDefault} />
