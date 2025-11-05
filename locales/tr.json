@@ -51,5 +51,7 @@
     "value": "Değer",
     "minimum": "Minimum",
     "maximum": "Maksimum",
-    "precise": "Kesin"
+    "precise": "Kesin",
+    "user_id": "Kullanıcı ID",
+    "link_account": "Hesabı Bağla"
   }

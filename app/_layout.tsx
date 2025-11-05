@@ -5,12 +5,9 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import 'react-native-reanimated';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import firebaseApp from '../firebaseConfig';
-import LoginScreen from './screens/LoginScreen';
 import { useColorScheme } from '@/components/useColorScheme';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-
+import { getUserId } from './services/user';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -25,7 +22,7 @@ export const unstable_settings = {
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
-const AuthContext = createContext<{ user: any }>({ user: null });
+const AuthContext = createContext<{ userId: string | null }>({ userId: null });
 export const useAuth = () => useContext(AuthContext);
 
 export default function RootLayout() {
@@ -33,7 +30,7 @@ export default function RootLayout() {
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     ...FontAwesome.font,
   });
-  const [user, setUser] = useState<any>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
 
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
@@ -48,25 +45,21 @@ export default function RootLayout() {
   }, [loaded]);
 
   useEffect(() => {
-    const auth = getAuth(firebaseApp);
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      setUser(firebaseUser);
+    const fetchUserId = async () => {
+      const id = await getUserId();
+      setUserId(id);
       setAuthLoading(false);
-    });
-    return unsubscribe;
+    };
+    fetchUserId();
   }, []);
 
   if (!loaded || authLoading) {
     return null;
   }
 
-  if (!user) {
-    return <LoginScreen />;
-  }
-
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <AuthContext.Provider value={{ user }}>
+      <AuthContext.Provider value={{ userId }}>
         <RootLayoutNav />
       </AuthContext.Provider>
     </GestureHandlerRootView>

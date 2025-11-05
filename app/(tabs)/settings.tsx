@@ -4,13 +4,12 @@ import { Text, View } from '@/components/Themed';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/components/useColorScheme';
 import { getLocales } from 'expo-localization';
-import { getAuth, signOut } from 'firebase/auth';
-import firebaseApp from '../../firebaseConfig';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import i18n from '@/i18n';
 import Constants from 'expo-constants';
 import GlobalStyles, { box } from '@/constants/GlobalStyles';
 import * as SecureStore from 'expo-secure-store';
+import { useAuth } from '../_layout';
 
 const LANGUAGES = [
   { code: 'en', label: 'English' },
@@ -25,8 +24,7 @@ const GITHUB_URL = 'https://github.com/devbd1/routiner';
 export default function SettingsScreen() {
   const colorScheme = useColorScheme() ?? 'dark';
   const theme = Colors[colorScheme];
-  const auth = getAuth(firebaseApp);
-  const user = auth.currentUser;
+  const { userId } = useAuth();
 
   // Language selection
   const deviceLang = getLocales()[0]?.languageCode || 'en';
@@ -37,17 +35,6 @@ export default function SettingsScreen() {
 
   // Premium state
   const [isPremium, setIsPremium] = useState(false);
-
-  // Log out handler
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      Alert.alert(i18n.t('logout'), i18n.t('logged_out_message'));
-      // Optionally, navigate to login screen
-    } catch (err: any) {
-      Alert.alert('Logout Error', err.message);
-    }
-  };
 
   // Handle language change
   const handleLanguageChange = (lang: string) => {
@@ -63,7 +50,7 @@ export default function SettingsScreen() {
         <View style={styles.userRow}>
           <FontAwesome5 name="user-circle" size={28} color={theme.button2} style={{ marginRight: 12 }} />
           <View style={{ flex: 1 }}>
-            <Text style={[styles.userEmail, { color: theme.text }]}>{user?.email || i18n.t('not_logged_in')}</Text>
+            <Text style={[styles.userEmail, { color: theme.text }]}>{i18n.t('user_id')}: {userId}</Text>
             {isPremium && (
               <View style={styles.premiumBadge}>
                 <FontAwesome5 name="crown" size={16} color={theme.button2} solid />
@@ -71,8 +58,8 @@ export default function SettingsScreen() {
               </View>
             )}
           </View>
-          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-            <Text style={[styles.logoutText, { color: theme.button2 }]}>{i18n.t('logout')}</Text>
+          <TouchableOpacity style={styles.logoutButton} onPress={() => Alert.alert('Link Account', 'This feature is coming soon!')}>
+            <Text style={[styles.logoutText, { color: theme.button2 }]}>{i18n.t('link_account')}</Text>
           </TouchableOpacity>
         </View>
       </View>

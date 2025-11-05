@@ -51,5 +51,7 @@
     "value": "Value",
     "minimum": "Minimum",
     "maximum": "Maximum",
-    "precise": "Precise"
+    "precise": "Precise",
+    "user_id": "User ID",
+    "link_account": "Link Account"
   }
