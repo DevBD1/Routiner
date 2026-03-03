@@ -71,3 +71,6 @@ Streak maintenance alerts
 Tap on a habit to see its history
 Show progress over time
 Display completion patterns
+## FirstSpawn agentic strategy
+
+- See `docs/firstspawn-native-agentic-system.md` for the autonomous multi-agent system blueprint.
